@@ -3,14 +3,10 @@
 clear;
 close all;
 
+% TODO: Turn it into a function, - add a flag for power noise removal 
+
 % Add OSET's Tools folder to the Matlab path
 addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools')
-% Add Dr. Fattahi's QT folder to Matlab path
-% https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
-addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
-% Add Dr. Qiao's QT estimator folder to Matlab path
-%  https://github.com/cliffordlab/QTestimation.git
-addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QTestimation\QTestimation\QT_for_Alivecor\')
 
 
 % Import the PTB dataset using wfdb rdsamp function
@@ -60,12 +56,12 @@ dbc_one_side = dbc_two_sided(1:L/2+1);
 dbc_one_side(2:end-1) = 2*dbc_one_side(2:end-1);
 f = fs*(0:(L/2)) /L;
 
-figure()
-% periodogram(data_base_cor)]
-plot(f, dbc_one_side)
-title('Single sided amplitute spectrum of base corrected signal')
-xlabel('f(Hz)')
-ylabel('|X|');
+% figure()
+% % periodogram(data_base_cor)]
+% plot(f, dbc_one_side)
+% title('Single sided amplitute spectrum of base corrected signal')
+% xlabel('f(Hz)')
+% ylabel('|X|');
 % Don't see a peak at 50 or 60 Hz, don't need to do power line noise
 % cancellation
 
@@ -93,3 +89,11 @@ ylabel('|X|');
 % % title("The channel signal after powerline noise filter");
 % figure()
 % periodogram(y)
+%% CSV write
+% output = [fs; data_base_cor];
+% fid = fopen('preprocessed.csv','w');
+% fprintf(fid,',%f\n',output);
+% 
+% fclose(fid);
+csvwrite('preprocessed.csv', data_base_cor');
+
