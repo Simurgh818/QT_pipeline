@@ -15,11 +15,11 @@ data_base_cor_csv = csvread('preprocessed.csv');
 fs0 = '1000';
 
 % QT_output = '\QT_pipeline\QT_output.csv'
-QT_analysis('preprocessed.csv', fs0, '1', '1', 'QT_output.csv', 'w');
+QT_analysis('preprocessed.csv', fs0, '14', '14', 'QT_output.csv', 'w');
 
 QT = csvread('QT_output.csv', 0,1);
 
-disp(QT(1:5))
+% disp(QT(1:5));
 md_QT_Qiao = median(QT(1:5))
 % 
 % [QT1, RR1] = QT_analysis_single_lead(data_base_cor_csv(:,1),fs) 
@@ -27,9 +27,9 @@ md_QT_Qiao = median(QT(1:5))
 
 % 2- Model Based method: Dr. Fattahi
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
-
-% GaussParams=qtParamsGausFit(data_base_cor_T, fs);
-% md_QT_Fattahi = median(GaussParams.q)
+fs = str2double(fs0);
+[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv, fs);
+md_QT_Fattahi = median(qtInt)
 
 % TODO: looks like need to have a multichannel input.
 % - what does Fattahi q mean?
