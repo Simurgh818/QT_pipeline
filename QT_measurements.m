@@ -47,3 +47,8 @@ plot(x, md_QT_Qiao, x, md_QT_Fattahi);
 legend('Non-model','Model');
 xlabel('channels');
 ylabel('time (s)');
+%% 
+
+figure(2)
+x2 = 1:165;
+plot(x2, qtInt(1,1:165,1), x2, qtInt(1,1:165,2))
