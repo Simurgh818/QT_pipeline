@@ -6,7 +6,7 @@ close all;
 % TODO: Turn it into a function, - add a flag for power noise removal 
 
 % Add OSET's Tools folder to the Matlab path
-addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools')
+addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
 
 
 % Import the PTB dataset using wfdb rdsamp function
@@ -49,6 +49,7 @@ data_base_cor = data - b_md;
 %% Check to see if Powerline noise is present
 
 % TODO: use periodogram to see if there is a peak at 50 or 60 Hz.
+% add an if statement to remove power noise if there is a peak
 L = 115200; %length of the signal
 
 data_base_cor_f_two_sided = fft(data_base_cor);
@@ -96,5 +97,6 @@ f = fs*(0:(L/2)) /L;
 % fprintf(fid,',%f\n',output);
 % 
 % fclose(fid);
+% ToDO: specifiy preprocessed.csv location folder
 csvwrite('preprocessed.csv', data_base_cor');
 
