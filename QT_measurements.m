@@ -77,9 +77,14 @@ xlabel('channels');
 ylabel('time (s)');
 hold off
 fileName = [fName , '.png'];
+
+if ~exist(figPath, 'dir')
+    mkdir(figPath)
+end
 figName = fullfile(figPath, fileName);
-close all;
 saveas(gcf, figName);
+close all;
+
 %% 
 
 % figure(2)
