@@ -1,6 +1,33 @@
+function preprocessing(inPath, outPath)
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Preprocessing ECG signal
-% Sina Dabiri, 2021
-clear;
+% 
+% Syntax:
+% 
+% 
+% Inputs:
+% 
+% 
+% Output:
+% 
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Copyright (C) 2021  Sina Dabiri
+% sdabiri@emory.edu
+% 
+% 
+% This program is free software; you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by the
+% Free Software Foundation; either version 2 of the License, or (at your
+% option) any later version.
+% This program is distributed in the hope that it will be useful, but
+% WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+% Public License for more details.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
 close all;
 
 % TODO: Turn it into a function, - add a flag for power noise removal 
@@ -8,9 +35,8 @@ close all;
 % Add OSET's Tools folder to the Matlab path
 addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
 
-
 % Import the PTB dataset using wfdb rdsamp function
-[sig, fs, tm] = rdsamp('ptbdb/patient001/s0014lre', [1:14]);% for specific channel 
+[sig, fs, tm] = rdsamp(inPath, [1:14]);% for specific channel 
 % use s0014lre for i.e. ch 1
 data = sig'; %Transpose the signal to have as row vector.
 % plot(tm, sig);
@@ -98,5 +124,5 @@ f = fs*(0:(L/2)) /L;
 % 
 % fclose(fid);
 % ToDO: specifiy preprocessed.csv location folder
-csvwrite('preprocessed.csv', data_base_cor');
-
+csvwrite(outPath, data_base_cor');
+end 
