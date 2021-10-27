@@ -27,11 +27,21 @@
 clear;
 close all;
 
-inPath = 'ptbdb/patient001/s0014lre';
-outPath = 'preprocessed.csv';
-preprocessing(inPath, outPath);
+dbPath = 'C:/Users/sinad/wfdb/database/ptbdb/';
+folderNames = ls(fullfile(dbPath, '*patient*'));
+[numPatients, ~] = size(folderNames);
+for fn=1:1
+    
+    inPath = ['ptbdb/', folderNames(fn,:), '/s0014lre'];
+        
+    outPath = 'preprocessed.csv';
+    preprocessing(inPath, outPath);
 
-processedPath = outPath; 
-[fPath,fName,fExt]=fileparts(inPath);
-figPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
-QT_measurements(processedPath, fName, figPath);
+    processedPath = outPath; 
+    [fPath,fName,fExt]=fileparts(inPath);
+    figPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
+    QT_measurements(processedPath, fName, figPath);
+end
+
+
+
