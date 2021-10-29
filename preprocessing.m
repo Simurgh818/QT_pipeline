@@ -30,7 +30,7 @@ function preprocessing(inPath, outPath)
 
 close all;
 
-% TODO: Turn it into a function, - add a flag for power noise removal 
+% TODO: - add 2nd order iir notch filter back in for power noise removal 
 
 % Add OSET's Tools folder to the Matlab path
 addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
@@ -118,11 +118,6 @@ f = fs*(0:(L/2)) /L;
 % figure()
 % periodogram(y)
 %% CSV write
-% output = [fs; data_base_cor];
-% fid = fopen('preprocessed.csv','w');
-% fprintf(fid,',%f\n',output);
-% 
-% fclose(fid);
-% ToDO: specifiy preprocessed.csv location folder
+
 csvwrite(outPath, data_base_cor');
 end 

@@ -28,10 +28,11 @@ clear;
 close all;
 
 dbPath = 'C:/Users/sinad/wfdb/database/ptbdb/';
+
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=1:2
-%     TODO: add inner loop, to loop through each subject's records
+for fn=2:2
+
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
     for rn=1:numRecords

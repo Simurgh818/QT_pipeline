@@ -76,16 +76,19 @@ legend('Non-model','Model');
 xlabel('channels');
 ylabel('time (s)');
 hold off
-fileName = [fName , '.png'];
-
 if ~exist(figPath, 'dir')
     mkdir(figPath)
 end
-figName = fullfile(figPath, fileName);
-saveas(gcf, figName);
+
+figExt = ['.fig';'.eps'; '.png'];
+for fx=1:3
+    fileName = [fName , figExt(fx,:)];
+    figName = fullfile(figPath, fileName);
+    saveas(gcf, figName);
+end
 close all;
 
-%% 
+%% save results as a csv
 
 % figure(2)
 % x2 = 1:165;
