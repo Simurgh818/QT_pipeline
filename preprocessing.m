@@ -1,4 +1,4 @@
-function preprocessing(inPath, outPath)
+function [fs] = preprocessing(inPath, outPath, nChannels)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Preprocessing ECG signal
@@ -36,7 +36,7 @@ close all;
 addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
 
 % Import the PTB dataset using wfdb rdsamp function
-[sig, fs, tm] = rdsamp(inPath, [1:14]);% for specific channel 
+[sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 
 % use s0014lre for i.e. ch 1
 data = sig'; %Transpose the signal to have as row vector.
 % plot(tm, sig);

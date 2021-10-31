@@ -1,4 +1,4 @@
-function QT_measurements(processedPath, fName, figPath)
+function QT_measurements(processedPath, fName, figPath, nChannels, fs)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PQT Interval Estimation:
@@ -39,23 +39,33 @@ addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSa
 close all;
 
 data_base_cor_csv = csvread(processedPath);
-fs0 = '1000';
-fs = str2double(fs0);
+fs0 = num2str(fs);
+nChannels_str = num2str(nChannels);
+% fs0 = '1000';
+% fs = str2double(fs0);
 % ToDO: specifiy QT_output.csv location folder
 QT_output = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QT_pipeline\QT_output.csv';
-QT_analysis('preprocessed.csv', fs0, '14', '14', QT_output, 'w');
+% [QT_f, RR] = QT_analysis('preprocessed.csv', fs0, nChannels_str, nChannels_str, QT_output, 'w');
 
-QT = csvread('QT_output.csv', 0,1);
-QT_reshaped = reshape(QT(1:70), [5, 14]);
-md_QT_Qiao = zeros(1,14);
-channel = 1;
-for ch=1:14
-    md_QT_Qiao(ch) = QT_reshaped(2,ch)/fs; % the second row is 
+% QT = csvread('QT_output.csv', 0,1);
+% QT_reshaped = reshape(QT(1:70), [5, 14]);
+% md_QT_Qiao = zeros(1,14);
+QT = zeros(nChannels,5);
+RR = zeros(nChannels, 3);
+
+for ch=1:nChannels
+    [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs);
+    
+%     md_QT_Qiao(ch) = QT_reshaped(2,ch)/fs; % the second row is 
     % the median of QT values and normalizing by sampling frequency
 end
-% 
+% ToDO: need to normalize by fs 
+% restore values in more transparent variables: QT =[meanQT_jQRS,
+% medianQT_wavelet, medianQT_SQI, gaussQT_jQRS, gaussQT_wavelet]
+% RR = [rr_jQRS, medianRR_wavelet, meanRR_wavelet]
+
 % [QT1, RR1] = QT_analysis_single_lead(data_base_cor_csv(:,1),fs) 
-% md_QT_Qiao = median(QT1)
+md_QT_Qiao = QT(:,2)'/fs;
 %% 2- Model Based method: Mr. Fattahi
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 

@@ -28,6 +28,7 @@ clear;
 close all;
 
 dbPath = 'C:/Users/sinad/wfdb/database/ptbdb/';
+nChannels = 14; % number of channels to read
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
@@ -40,7 +41,7 @@ for fn=2:2
         inPath = ['ptbdb/', folderNames(fn,:),'/', baseFileName];
 
         outPath = 'preprocessed.csv';
-        preprocessing(inPath, outPath);
+        fs = preprocessing(inPath, outPath, nChannels);
 
         processedPath = outPath; 
         [fPath,fName,fExt]=fileparts(inPath);
@@ -49,7 +50,7 @@ for fn=2:2
             mkdir(figPath)
         end
 
-        QT_measurements(processedPath, fName, figPath);
+        QT_measurements(processedPath, fName, figPath, nChannels, fs);
         
     end
 end
