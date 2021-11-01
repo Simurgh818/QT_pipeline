@@ -61,7 +61,7 @@ for fn=2:2
             mkdir(figPath)
         end
 
-        [Lin] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
+        [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
         
     end
 end

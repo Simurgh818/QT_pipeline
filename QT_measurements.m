@@ -1,4 +1,4 @@
-function [Lin] = QT_measurements(processedPath, fName, figPath, nChannels, fs)
+function [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PQT Interval Estimation:
@@ -50,6 +50,9 @@ Lin.MeanQT_jQRS=[]; Lin.MedianQT_wavelet=[];
 Lin.MedianQT_wavelet_SQI=[]; Lin.GaussQT_jQRS=[]; 
 Lin.GaussQT_wavelet=[];
 Lin.RR_jQRS=[]; Lin.MedianRR_wavelet=[]; Lin.MeanRR_wavelet=[];
+
+Fattahi.MeanQT=[]; Fattahi.MedianQT = []; 
+Fattahi.MeanRR=[]; Fattahi.MedianRR = [];
 %% 
 
 for ch=1:nChannels
@@ -77,11 +80,23 @@ Lin.MeanRR_wavelet =  RR(:,3);
 %% 2- Model Based method: Mr. Fattahi
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 
-[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv, fs);
-md_QT_Fattahi = zeros(1,14);
-for ch=1:14
-    md_QT_Fattahi(ch) = nanmedian(qtInt(1,:,ch));
+% [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv, fs);
+md_QT_Fattahi = zeros(1,nChannels);
+rPeaks = [];
+qtInt = [];
+
+for ch=1:nChannels
+    [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs);
+    md_QT_Fattahi(ch) = nanmedian(qtInt(1,:));
+    Fattahi.MedianQT(ch,1)= nanmedian(qtInt(1,:));
+    Fattahi.MeanQT(ch,1) = nanmean(qtInt(1,:));
+    Fattahi.MeanRR(ch,1) = mean(diff(rPeaks)/fs);
+    Fattahi.MedianRR(ch,1) = nanmedian(diff(rPeaks))/fs;
 end
+
+
+
+
 
 %% Plotting Dr. Li vs. Mr. Fattahi QT measurments
 
@@ -104,12 +119,22 @@ for fx=1:3
     figName = fullfile(figPath, fileName);
     saveas(gcf, figName);
 end
-close all;
+% close all;
 
 %% save results as a csv
 
+colName = 'channelNum';
 Lin_table = struct2table(Lin);
-writetable(Lin_table, 'QT_results.csv');
+Lin_table.(colName)=  [1:nChannels]';
+% Lin_table = addvars(Lin_table, channelNum, 'before', 'MeanQT_jQRS'); 
+Fattahi_table = struct2table(Fattahi);
+% Fattahi_table = addvars(Fattahi_table, channelNum, 'before', 'MedianQT');
+Fattahi_table.(colName) =  [1:nChannels]';
+joined_tables = join(Lin_table, Fattahi_table, 'keys', colName);
+
+csv_fileName = [fName, '_QT_results.csv'];
+fileName = fullfile(figPath, csv_fileName);
+writetable(joined_tables, fileName);
 % figure(2)
 % x2 = 1:165;
 % plot(x2, qtInt(1,1:165,1), x2, qtInt(1,1:165,2))
