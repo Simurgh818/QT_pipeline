@@ -14,6 +14,17 @@
 % Copyright (C) 2021  Sina Dabiri
 % sdabiri@emory.edu
 % 
+% Add OSET's Tools folder to the Matlab path
+addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
+
+% 1- Non-model method: Dr. Qiao wavelet method
+%  https://github.com/cliffordlab/QTestimation.git
+% Add Dr. Qiao's QT estimator folder to Matlab path
+addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QTestimation\QTestimation\QT_for_Alivecor\')
+% Add Dr. Fattahi's QT folder to Matlab path
+% https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
+addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
+
 % 
 % This program is free software; you can redistribute it and/or modify it
 % under the terms of the GNU General Public License as published by the
@@ -50,7 +61,7 @@ for fn=2:2
             mkdir(figPath)
         end
 
-        QT_measurements(processedPath, fName, figPath, nChannels, fs);
+        [Lin] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
         
     end
 end

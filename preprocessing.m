@@ -32,8 +32,6 @@ close all;
 
 % TODO: - add 2nd order iir notch filter back in for power noise removal 
 
-% Add OSET's Tools folder to the Matlab path
-addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
 
 % Import the PTB dataset using wfdb rdsamp function
 [sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 
