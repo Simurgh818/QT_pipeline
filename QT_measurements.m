@@ -123,8 +123,7 @@ end
 % close all;
 [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 9), fs);
 [L, ~] = size(data_base_cor_csv); %length of the signal
-Ls = L/fs;
-ch_9_T = data_base_cor_csv(:,9);
+
 Q_start = round(rPeaks+waveParams.q(1,:)*fs);
 T_end = round(rPeaks+waveParams.t(2,:)*fs);
 Q_start = Q_start(Q_start>0);
@@ -133,10 +132,9 @@ figure(2)
 hold on
 plot(1:L, -data_base_cor_csv(:,9), 'b-');
 title('Lead 9');
-[~, L_beats]= size(rPeaks);
-plot(Q_start, -data_base_cor_csv(Q_start,9), 'r*');
+plot(Q_start, -data_base_cor_csv(Q_start,9), 'g*');
 plot(T_end, -data_base_cor_csv(T_end,9), 'r*');
-legend('Lead 9','R peaks');
+legend('Lead 9','Q start', 'T end');
 xlabel('samples');
 ylabel('mV');
 hold off
