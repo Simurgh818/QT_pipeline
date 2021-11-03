@@ -74,7 +74,8 @@ data_base_cor = data - b_md;
 
 % TODO: use periodogram to see if there is a peak at 50 or 60 Hz.
 % add an if statement to remove power noise if there is a peak
-L = 115200; %length of the signal
+[L, ~] = size(data_base_cor); %length of the signal
+% L = 115200; %length of the signal
 
 data_base_cor_f_two_sided = fft(data_base_cor);
 dbc_two_sided = abs(data_base_cor_f_two_sided/L);

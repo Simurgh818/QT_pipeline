@@ -105,8 +105,9 @@ figure(1)
 hold on
 scatter(x, md_QT_Qiao, 'b', 'filled');
 scatter(x, md_QT_Fattahi, 'r', 'filled');
-legend('Non-model','Model');
-xlabel('channels');
+legend('wavelet','Gaussian Model');
+title('Median QT');
+xlabel('leads');
 ylabel('time (s)');
 hold off
 if ~exist(figPath, 'dir')
@@ -120,7 +121,30 @@ for fx=1:3
     saveas(gcf, figName);
 end
 % close all;
-
+[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 9), fs);
+[L, ~] = size(data_base_cor_csv); %length of the signal
+Ls = L/fs;
+ch_9_T = data_base_cor_csv(:,9);
+Q_start = round(rPeaks+waveParams.q(1,:)*fs);
+T_end = round(rPeaks+waveParams.t(2,:)*fs);
+Q_start = Q_start(Q_start>0);
+T_end = T_end(~isnan(T_end));
+figure(2)
+hold on
+plot(1:L, -data_base_cor_csv(:,9), 'b-');
+title('Lead 9');
+[~, L_beats]= size(rPeaks);
+plot(Q_start, -data_base_cor_csv(Q_start,9), 'r*');
+plot(T_end, -data_base_cor_csv(T_end,9), 'r*');
+legend('Lead 9','R peaks');
+xlabel('samples');
+ylabel('mV');
+hold off
+for fx=1:3
+    fileName = [fName , '_lead9', figExt(fx,:)];
+    figName = fullfile(figPath, fileName);
+    saveas(gcf, figName);
+end
 %% save results as a csv
 
 colName = 'channelNum';
