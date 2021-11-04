@@ -28,7 +28,7 @@ function [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChanne
 %%
 
 % clear;
-close all;
+% close all;
 
 data_base_cor_csv = csvread(processedPath);
 fs0 = num2str(fs);
