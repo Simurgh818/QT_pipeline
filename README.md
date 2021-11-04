@@ -9,6 +9,7 @@ Please add OSET's tools folder and Mr. Fattahi's QT folders to your matlab paths
 
 In addition, Dr. Li's wavelet method is used:
 [T. Zhu, A. E. W. Johnson, J. Behar, and G. D. Clifford, “Bayesian voting of multiple annotators for improved QT interval estimation,” p. 4.](http://cinc.mit.edu/archives/2013/pdf/0659.pdf).
+
 [T. Zhu, N. Dunkley, J. Behar, D. A. Clifton, and G. D. Clifford, “Fusing Continuous-Valued Medical Labels Using a Bayesian Model,” Ann. Biomed. Eng., vol. 43, no. 12, pp. 2892–2902, Dec. 2015, doi: 10.1007/s10439-015-1344-1.](https://drive.google.com/file/d/0B5wjNvhEV8-iVUxnbmJ2NV85T2s/view?resourcekey=0-MiMjnpPlULoUicGRQeOiOw).
 
 
