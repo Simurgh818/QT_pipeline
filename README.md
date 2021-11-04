@@ -24,9 +24,9 @@ git clone https://github.com/alphanumericslab/OSET.git
 
 
 - clone Dr. Li's from:  
-'''install 
+```install 
 git clone https://github.com/cliffordlab/QTestimation.git
-'''
+```
 
 - Add Dr. Qiao's QT estimator folder to Matlab path
 - addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Alivecor\')
