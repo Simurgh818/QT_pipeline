@@ -50,9 +50,10 @@ Lin.MeanQT_jQRS=[]; Lin.MedianQT_wavelet=[];
 Lin.MedianQT_wavelet_SQI=[]; Lin.GaussQT_jQRS=[]; 
 Lin.GaussQT_wavelet=[];
 Lin.RR_jQRS=[]; Lin.MedianRR_wavelet=[]; Lin.MeanRR_wavelet=[];
+Lin.MedianQT_IQR=[]; 
 
 Fattahi.MeanQT=[]; Fattahi.MedianQT = []; 
-Fattahi.MeanRR=[]; Fattahi.MedianRR = [];
+Fattahi.MeanRR=[]; Fattahi.MedianRR = []; Fattahi.MedianQT_IQR = [];
 %% 
 
 for ch=1:nChannels
@@ -71,6 +72,12 @@ Lin.GaussQT_wavelet = QT(:,5)/fs;
 %     gaussQT_wavelet};
 
 md_QT_Qiao = Lin.MedianQT_wavelet';
+% Calculate median of interquartile range of 25-75%
+Lin_IQR = iqr(Lin.MedianQT_wavelet,1);
+Lin_iqr_lower = prctile(Lin.MedianQT_wavelet, 25)-Lin_IQR; %calc lower IQR
+Lin_iqr_upper = prctile(Lin.MedianQT_wavelet, 75)+Lin_IQR; %calc upper IQR
+Lin_indecies = Lin_iqr_lower<Lin.MedianQT_wavelet & Lin.MedianQT_wavelet <Lin_iqr_upper;
+Lin.MedianQT_IQR(1:nChannels, 1) = median(Lin.MedianQT_wavelet(Lin_indecies)); % median QT across the interquartile range
 
 % RR = [rr_jQRS, medianRR_wavelet, meanRR_wavelet]
 Lin.RR_jQRS = RR(:,1); 
@@ -94,9 +101,12 @@ for ch=1:nChannels
     Fattahi.MedianRR(ch,1) = nanmedian(diff(rPeaks))/fs;
 end
 
-
-
-
+% Calculate median of interquartile range of 25-75%
+Fattahi_IQR = iqr(Fattahi.MedianQT,1);
+Fattahi_iqr_lower = prctile(Fattahi.MedianQT, 25)-Fattahi_IQR; %calc lower IQR
+Fattahi_iqr_upper = prctile(Fattahi.MedianQT, 75)+Fattahi_IQR; %calc upper IQR
+Fattahi_indecies = Fattahi_iqr_lower<Fattahi.MedianQT & Fattahi.MedianQT<Fattahi_iqr_upper;
+Fattahi.MedianQT_IQR(1:nChannels, 1) = median(Fattahi.MedianQT(Fattahi_indecies)); % median QT across the interquartile range
 
 %% Plotting Dr. Li vs. Mr. Fattahi QT measurments
 
@@ -120,7 +130,7 @@ for fx=1:3
     figName = fullfile(figPath, fileName);
     saveas(gcf, figName);
 end
-% close all;
+
 [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 9), fs);
 [L, ~] = size(data_base_cor_csv); %length of the signal
 
@@ -143,6 +153,7 @@ for fx=1:3
     figName = fullfile(figPath, fileName);
     saveas(gcf, figName);
 end
+close all;
 %% save results as a csv
 
 colName = 'channelNum';
