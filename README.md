@@ -29,12 +29,12 @@ git clone https://github.com/cliffordlab/QTestimation.git
 ```
 
 - Add Dr. Qiao's QT estimator folder to Matlab path
-- addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Alivecor\')
+addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Alivecor\')
 
 - To add the dataset you want QT measured in with the number of channels:
-- Download the WFDB Software package from: (https://www.physionet.org/content/wfdb/10.6.2/)
-- Install the WFDB toolbox by following instructions in: (https://archive.physionet.org/physiotools/matlab/wfdb-app-matlab/.)
-- add the path and the number of channels in main_pipe.m , for example to add PTB database:
+Download the WFDB Software package from: (https://www.physionet.org/content/wfdb/10.6.2/)
+Install the WFDB toolbox by following instructions in: (https://archive.physionet.org/physiotools/matlab/wfdb-app-matlab/.)
+add the path and the number of channels in main_pipe.m , for example to add PTB database:
  dbPath = 'C:/Users/you/wfdb/database/ptbdb/';
  nChannels = 14; % number of channels to read
  
