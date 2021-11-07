@@ -51,7 +51,7 @@ Once installed, the user can open the MATLAB script called main_pipe.m to run th
 
 ## Results
 
-The scripts will produce one scatter plot per patient's and sbuject's record in the results_path alogn with a CSV with QT measurments. To use QT measurment over all channels, please use  MedianQT_IQR_Lin_table and MedianQT_IQR_Fattahi_table. This variable measures the median QT interval in the interquartile range (between 1st nd 3rd interquartile to exclude outliers).
+The scripts will produce one scatter plot per patient's and subject's record in the results_path alogn with a CSV with QT measurments. To use QT measurment over all channels, please use  MedianQT_IQR_Lin_table and MedianQT_IQR_Fattahi_table. This variable measures the median QT interval in the interquartile range (between 1st nd 3rd interquartile to exclude outliers).
 
 Below scatter plot shows the scatter plot of the two method of Dr. Lin's wavelet and Mr. Fattahi's Gaussian model for patient 1 (record s0014lre) of the PTB database:
 
