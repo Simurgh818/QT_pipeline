@@ -55,7 +55,7 @@ The scripts will produce one scatter plot per patient's and sbuject's record in 
 
 Below scatter plot shows the scatter plot of the two method of Dr. Lin's wavelet and Mr. Fattahi's Gaussian model for patient 1 of the PTB database:
 
-![Results]()
+![Results](s0014lre.png)
 
 ## Contributor
 [Sina Dabiri](https://github.com/Simurgh818)
