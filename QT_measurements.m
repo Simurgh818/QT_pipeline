@@ -25,25 +25,10 @@ function [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChanne
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
+%% Initialize variables
 
-% clear;
-% close all;
+data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-data_base_cor_csv = csvread(processedPath);
-% fs0 = num2str(fs);
-% nChannels_str = num2str(nChannels);
-% fs0 = '1000';
-% fs = str2double(fs0);
-% ToDO: specifiy QT_output.csv location folder
-% QT_output = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QT_pipeline\QT_output.csv';
-% [QT_f, RR] = QT_analysis('preprocessed.csv', fs0, nChannels_str, nChannels_str, QT_output, 'w');
-
-% QT = csvread('QT_output.csv', 0,1);
-% QT_reshaped = reshape(QT(1:70), [5, 14]);
-% md_QT_Qiao = zeros(1,14);
-
-% Initialize variables
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
 Lin.MeanQT_jQRS=[]; Lin.MedianQT_wavelet=[]; 
@@ -57,24 +42,21 @@ Lin.GaussQTlc_wavelet=[]; Lin.MedianQTlc_IQR=[];
 Fattahi.MeanQT=[]; Fattahi.MedianQT = []; 
 Fattahi.MeanRR=[]; Fattahi.MedianRR = []; Fattahi.MedianQT_IQR = [];
 Fattahi.MeanQTlc=[]; Fattahi.MedianQTlc=[]; Fattahi.MedianQTlc_IQR=[];
-%% 
+%% Dr. Li's QT measurment
 
 for ch=1:nChannels
     [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs);
 
 end
 
-%  QT =[meanQT_jQRS, medianQT_wavelet, medianQT_SQI, gaussQT_jQRS, gaussQT_wavelet]
-
 Lin.MeanQT_jQRS = QT(:,1)/fs;
 Lin.MedianQT_wavelet = QT(:,2)/fs;
 Lin.MedianQT_wavelet_SQI = QT(:,3)/fs;
 Lin.GaussQT_jQRS = QT(:,4)/fs;
 Lin.GaussQT_wavelet = QT(:,5)/fs;
-% QT_cell = {meanQT_jQRS; medianQT_wavelet; medianQT_wavelet_SQI; gaussQT_jQRS...
-%     gaussQT_wavelet};
 
-md_QT_Qiao = Lin.MedianQT_wavelet';
+md_QT_Qiao = Lin.MedianQT_wavelet'; %for the plot
+
 % Calculate median of interquartile range of 25-75%
 Lin_IQR = iqr(Lin.MedianQT_wavelet,1);
 Lin_iqr_lower = prctile(Lin.MedianQT_wavelet, 25)-Lin_IQR; %calc lower IQR
@@ -98,7 +80,6 @@ Lin.MedianQTlc_IQR = Lin.MedianQT_IQR + 0.154*(1-Lin.MedianRR_wavelet);
 %% 2- Model Based method: Mr. Fattahi
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 
-% [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv, fs);
 md_QT_Fattahi = zeros(1,nChannels);
 rPeaks = [];
 qtInt = [];
@@ -128,7 +109,14 @@ Fattahi.MedianQTlc = Fattahi.MedianQT + 0.154*(1-Fattahi.MedianRR);
 Fattahi.MedianQTlc_IQR = Fattahi.MedianQT_IQR + 0.154*(1-Fattahi.MedianRR);
 
 % TODO: Calculate Mr. Fattahi MedianQT_SQI
+% Dr. Li uses Mbsqi_3 function to select beats, and sets RR <0.3 and >>3 to
+% NaN.
+%% Quality Control
 
+Fattahi.MedianQTlc(Fattahi.MedianQTlc>1 | Fattahi.MedianQTlc<0.1)=NaN;
+Fattahi.MeanQTlc(Fattahi.MeanQTlc>1 | Fattahi.MeanQTlc<0.1)=NaN;
+
+md_QT_Fattahi(md_QT_Fattahi>1 | md_QT_Fattahi<0.1) = NaN;
 %% Plotting Dr. Li vs. Mr. Fattahi QT measurments
 
 x = 1:nChannels;
@@ -188,23 +176,17 @@ Lin_table = table(channelNum, Lin.MedianQTlc_wavelet, Lin.MedianQTlc_wavelet_SQI
     Lin.GaussQTlc_wavelet, Lin.MedianQTlc_IQR, Lin.MeanQTlc_jQRS,... 
     Lin.GaussQTlc_jQRS, Lin.RR_jQRS, Lin.MedianRR_wavelet,'VariableNames',Lin_colNames);
 
-% Lin_table = struct2table(Lin);
-% Lin_table.(colName)=  [1:nChannels]';
-% Lin_table = addvars(Lin_table, channelNum, 'before', 'MeanQT_jQRS');
 Fattahi_colNames = {'channelNum', 'MedianQTlc', 'MeanQTlc', 'MedianQTlc_IQR',...
     'MedianRR', 'MeanRR'};
 
 Fattahi_table = table(channelNum, Fattahi.MedianQTlc, Fattahi.MeanQTlc,...
     Fattahi.MedianQTlc_IQR, Fattahi.MedianRR, Fattahi.MeanRR,...
     'VariableNames', Fattahi_colNames);
-% Fattahi_table = addvars(Fattahi_table, channelNum, 'before', 'MedianQT');
-% Fattahi_table.(colName) =  [1:nChannels]';
+
 joined_tables = join(Fattahi_table, Lin_table, 'keys', 'channelNum');
 
 csv_fileName = [fName, '_QT_results.csv'];
 fileName = fullfile(figPath, csv_fileName);
 writetable(joined_tables, fileName);
-% figure(2)
-% x2 = 1:165;
-% plot(x2, qtInt(1,1:165,1), x2, qtInt(1,1:165,2))
+
 end

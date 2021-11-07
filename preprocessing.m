@@ -35,9 +35,9 @@ close all;
 
 % Import the PTB dataset using wfdb rdsamp function
 [sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 
-% use s0014lre for i.e. ch 1
+
 data = sig'; %Transpose the signal to have as row vector.
-% plot(tm, sig);
+
 %% Dr. Sameni's OSET baseline removal
 % Using the median method to remove baseline:
 

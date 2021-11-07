@@ -17,12 +17,12 @@
 % Add OSET's Tools folder to the Matlab path
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\Tools\')
 %
-% 1- Non-model method: Dr. Qiao wavelet method
+% 1- Non-model method: Dr. Li wavelet method
 %  https://github.com/cliffordlab/QTestimation.git
 % Add Dr. Qiao's QT estimator folder to Matlab path
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QTestimation\QTestimation\QT_for_Alivecor\')
 %
-% 2- Add Dr. Fattahi's QT folder to Matlab path
+% 2- Add Mr. Fattahi's QT folder to Matlab path
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
 %
@@ -45,7 +45,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=2:2
+for fn=1:1
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
