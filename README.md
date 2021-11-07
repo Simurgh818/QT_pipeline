@@ -12,7 +12,7 @@ In addition, Dr. Li's wavelet method is used:
 
 [T. Zhu, N. Dunkley, J. Behar, D. A. Clifton, and G. D. Clifford, “Fusing Continuous-Valued Medical Labels Using a Bayesian Model,” Ann. Biomed. Eng., vol. 43, no. 12, pp. 2892–2902, Dec. 2015, doi: 10.1007/s10439-015-1344-1.](https://drive.google.com/file/d/0B5wjNvhEV8-iVUxnbmJ2NV85T2s/view?resourcekey=0-MiMjnpPlULoUicGRQeOiOw).
 
-
+***
 ## Installation instructions:
 - clone Dr. Sameni's OSET:
 ```install
@@ -34,21 +34,21 @@ addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Ali
 - To add the dataset you want QT measured in with the number of channels:
 - Download the WFDB Software package from: (https://www.physionet.org/content/wfdb/10.6.2/)
 - Install the WFDB toolbox by following instructions in: (https://archive.physionet.org/physiotools/matlab/wfdb-app-matlab/.)
-- add the path and the number of channels in main_pipe.m , for example to add PTB database:
-
-- dbPath = 'C:/Users/you/wfdb/database/ptbdb/';
-- nChannels = 14; % number of channels to read
- 
- - set results path:
+- add the path, the number of channels and the results path in main_pipe.m , for example to add PTB database:
+- 
+```install
+dbPath = 'C:/Users/you/wfdb/database/ptbdb/';
+nChannels = 14; % number of channels to read
 results_path = 'C:\Users\you\yourFolder\yourFolder\QT_results';
-
+```
+***
 ### Requirements
 This script was developed on a Windows machine with 7 core processor and 16 GB RAM. For the Physionet PTB database it took 22:25 hours to run.
 
 ## Description of scripts:
 Once installed, the user can open the MATLAB script called main_pipe.m to run the QT measurements. 
  
-
+***
 ## Results
 
 The scripts will produce one scatter plot per patient's and subject's record in the results_path alogn with a CSV with QT measurments. To use QT measurment over all channels, please use  MedianQT_IQR_Lin_table and MedianQT_IQR_Fattahi_table. This variable measures the median QT interval in the interquartile range (between 1st nd 3rd interquartile to exclude outliers).
@@ -56,7 +56,7 @@ The scripts will produce one scatter plot per patient's and subject's record in 
 Below scatter plot shows the scatter plot of the two method of Dr. Lin's wavelet and Mr. Fattahi's Gaussian model for patient 1 (record s0014lre) of the PTB database:
 
 ![Results](s0014lre.png)
-
+***
 ## Contributor
 [Sina Dabiri](https://github.com/Simurgh818)
 
