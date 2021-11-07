@@ -43,7 +43,7 @@ addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Ali
 results_path = 'C:\Users\you\yourFolder\yourFolder\QT_results';
 
 ### Requirements
-This script was developed on a Windows machine with 7 core processor and 16 GB RAM. Although it is not a computationally heavy script and it ran fine on BMI cluster with 1 CPU core and 2 GB RAM.
+This script was developed on a Windows machine with 7 core processor and 16 GB RAM. For the Physionet PTB database it took 22:25 hours to run.
 
 ## Description of scripts:
 Once installed, the user can open the MATLAB script called main_pipe.m to run the QT measurements. 
