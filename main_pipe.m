@@ -19,7 +19,7 @@
 %
 % 1- Non-model method: Dr. Li wavelet method
 %  https://github.com/cliffordlab/QTestimation.git
-% Add Dr. Qiao's QT estimator folder to Matlab path
+% Add Dr. Lin's QT estimator folder to Matlab path
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QTestimation\QTestimation\QT_for_Alivecor\')
 %
 % 2- Add Mr. Fattahi's QT folder to Matlab path

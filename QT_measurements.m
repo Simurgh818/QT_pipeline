@@ -1,7 +1,7 @@
 function [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PQT Interval Estimation:
+% QT Interval Estimation:
 % 
 % Syntax:
 % 
@@ -42,7 +42,7 @@ Lin.GaussQTlc_wavelet=[]; Lin.MedianQTlc_IQR=[];
 Fattahi.MeanQT=[]; Fattahi.MedianQT = []; 
 Fattahi.MeanRR=[]; Fattahi.MedianRR = []; Fattahi.MedianQT_IQR = [];
 Fattahi.MeanQTlc=[]; Fattahi.MedianQTlc=[]; Fattahi.MedianQTlc_IQR=[];
-%% Dr. Li's QT measurment
+%% Dr. Lin's QT measurment
 
 for ch=1:nChannels
     [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs);
@@ -117,7 +117,7 @@ Fattahi.MedianQTlc(Fattahi.MedianQTlc>1 | Fattahi.MedianQTlc<0.1)=NaN;
 Fattahi.MeanQTlc(Fattahi.MeanQTlc>1 | Fattahi.MeanQTlc<0.1)=NaN;
 
 md_QT_Fattahi(md_QT_Fattahi>1 | md_QT_Fattahi<0.1) = NaN;
-%% Plotting Dr. Li vs. Mr. Fattahi QT measurments
+%% Plotting Dr. Lin vs. Mr. Fattahi QT measurments
 
 x = 1:nChannels;
 figure(1)
