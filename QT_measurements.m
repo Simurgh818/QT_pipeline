@@ -89,6 +89,10 @@ waveParams = [];
 
 for ch=1:nChannels
     [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs);
+%     Quality Control check to exclude QT <0.1 and >1 second
+    qc_indecies = 0.1<qtInt & qtInt<1;
+    qtInt = qtInt(qc_indecies);
+
     md_QT_Fattahi(ch) = nanmedian(qtInt(1,:));
     Fattahi.MedianQT(ch,1)= nanmedian(qtInt(1,:));
     Fattahi.MeanQT(ch,1) = nanmean(qtInt(1,:));

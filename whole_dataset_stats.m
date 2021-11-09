@@ -7,6 +7,8 @@
 % 
 % Inputs:
 % set results path:
+clear
+
 dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 
@@ -30,6 +32,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 
 
+
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
 
@@ -38,27 +41,45 @@ QT_table_colNames = {'subject','record', 'MedianQTlc_IQR_Fattahi',...
 colToRead = {'MedianQTlc_IQR_Fattahi_table',...
             'MedianQTlc_IQR_Lin_table'};
 
-for fn=1:numPatients
+% TODO: use datastructure to collect QTs
+QT.subject={}; QT.record={};
+QT.MedianQTlc_IQR_Fattahi=[]; QT.MedianQTlc_IQR_Lin=[];
+% rows = numPatients;
+% QT = cell(rows);
+
+for fn=1:210
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.csv'));
     [numRecords, ~] = size(recordNames);
+    
+   
     for rn=1:numRecords
         [~, baseFileName, extension] = fileparts(recordNames(rn, :));
         inPath = fullfile(dbPath, folderNames(fn,:), [baseFileName,extension]);
         
         opts = detectImportOptions(inPath);
         opts.SelectedVariableNames = colToRead;
-        QT = readtable(inPath, opts);
+        QT_read = readtable(inPath, opts);
 %         TODO: use a structure instead
 
-        QT_table = table({folderNames(fn,:)}, {baseFileName},...
-            table2cell(QT(1,1)), table2cell(QT(1,2)),...
-            'VariableNames', QT_table_colNames);
+%         QT_table = table({folderNames(fn,:)}, {baseFileName},...
+%             table2cell(QT(1,1)), table2cell(QT(1,2)),...
+%             'VariableNames', QT_table_colNames);
+        row = fn*rn;
+        QT.subject(end+1,1) = {folderNames(fn,:)};
+        QT.record(end+1,1) = {baseFileName(1:8)};
+        QT.MedianQTlc_IQR_Fattahi(end+1,1) = table2array(QT_read(1,1));
+        QT.MedianQTlc_IQR_Lin(end+1,1) = table2array(QT_read(1,2));
+
 %         QT_m = table2array(QT(1,:));
 %         QT_record = [folderNames; rn; ]
         
     end
 end
-disp(QT_table)
-
+disp(QT)
+%% Box plot
+boxplot([QT.MedianQTlc_IQR_Fattahi, QT.MedianQTlc_IQR_Lin])
+xlabel(['Median QTlc Fattahi ', ' Median QTlc Lin']);
+ylabel('time (seconds)');
+title('PTB database Median QTlc')
 % outPath = 'stats.csv';

@@ -27,7 +27,7 @@
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
 %
 % set database path:
-dbPath = 'C:/Users/sinad/wfdb/database/ptbdb/';
+dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/ptbdb/';
 nChannels = 14; % number of channels to read
 %
 % set results path:
@@ -45,7 +45,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=1:1
+for fn=1:numPatients
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
