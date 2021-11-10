@@ -30,8 +30,6 @@ function [fs] = preprocessing(inPath, outPath, nChannels)
 
 close all;
 
-% TODO: - add 2nd order iir notch filter back in for power noise removal 
-
 
 % Import the PTB dataset using wfdb rdsamp function
 [sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 
@@ -57,13 +55,13 @@ data_base_cor = data - b_md;
 
 % TODO: use periodogram to see if there is a peak at 50 or 60 Hz.
 % add an if statement to remove power noise if there is a peak
-[L, ~] = size(data_base_cor); %length of the signal
-
-data_base_cor_f_two_sided = fft(data_base_cor);
-dbc_two_sided = abs(data_base_cor_f_two_sided/L);
-dbc_one_side = dbc_two_sided(1:L/2+1);
-dbc_one_side(2:end-1) = 2*dbc_one_side(2:end-1);
-f = fs*(0:(L/2)) /L;
+% [L, ~] = size(data_base_cor); %length of the signal
+% 
+% data_base_cor_f_two_sided = fft(data_base_cor);
+% dbc_two_sided = abs(data_base_cor_f_two_sided/L);
+% dbc_one_side = dbc_two_sided(1:L/2+1);
+% dbc_one_side(2:end-1) = 2*dbc_one_side(2:end-1);
+% f = fs*(0:(L/2)) /L;
 
 % figure()
 % % periodogram(data_base_cor)]

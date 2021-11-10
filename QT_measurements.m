@@ -55,7 +55,7 @@ Li.MedianQT_wavelet_SQI = QT(:,3)/fs;
 Li.GaussQT_jQRS = QT(:,4)/fs;
 Li.GaussQT_wavelet = QT(:,5)/fs;
 
-md_QT_Qiao = Li.MedianQT_wavelet'; %for the plot
+
 
 % Calculate median of interquartile range of 25-75%
 Li_IQR = iqr(Li.MedianQT_wavelet,1);
@@ -77,6 +77,8 @@ Li.MedianQTlc_wavelet = Li.MedianQT_wavelet + 0.154*(1-Li.MedianRR_wavelet);
 Li.MedianQTlc_wavelet_SQI = Li.MedianQT_wavelet_SQI + 0.154*(1-Li.MedianRR_wavelet);
 Li.GaussQTlc_wavelet = Li.GaussQT_wavelet + + 0.154*(1-Li.MedianRR_wavelet);
 Li.MedianQTlc_IQR = Li.MedianQT_IQR + 0.154*(1-Li.MedianRR_wavelet);
+
+md_QT_Qiao = Li.MedianQTlc_wavelet'; %for the plot
 %% 2- Model Based method: Mr. Fattahi
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 
@@ -93,7 +95,6 @@ for ch=1:nChannels
     qc_indecies = 0.1<qtInt & qtInt<1;
     qtInt = qtInt(qc_indecies);
 
-    md_QT_Fattahi(ch) = nanmedian(qtInt(1,:));
     Fattahi.MedianQT(ch,1)= nanmedian(qtInt(1,:));
     Fattahi.MeanQT(ch,1) = nanmean(qtInt(1,:));
     Fattahi.MeanRR(ch,1) = mean(diff(rPeaks)/fs);
@@ -111,6 +112,9 @@ Fattahi.MedianQT_IQR(1:nChannels, 1) = median(Fattahi.MedianQT(Fattahi_indecies)
 Fattahi.MeanQTlc = Fattahi.MeanQT + 0.154*(1-Fattahi.MeanRR);
 Fattahi.MedianQTlc = Fattahi.MedianQT + 0.154*(1-Fattahi.MedianRR);
 Fattahi.MedianQTlc_IQR = Fattahi.MedianQT_IQR + 0.154*(1-Fattahi.MedianRR);
+
+
+md_QT_Fattahi = Fattahi.MedianQTlc;
 
 % TODO: Calculate Mr. Fattahi MedianQT_SQI
 % Dr. Li uses Mbsqi_3 function to select beats, and sets RR <0.3 and >>3 to

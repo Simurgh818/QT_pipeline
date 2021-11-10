@@ -47,7 +47,7 @@ QT.MedianQTlc_IQR_Fattahi=[]; QT.MedianQTlc_IQR_Li=[];
 % rows = numPatients;
 % QT = cell(rows);
 
-for fn=1:100
+for fn=1:numPatients
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.csv'));
     [numRecords, ~] = size(recordNames);

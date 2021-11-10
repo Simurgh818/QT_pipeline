@@ -45,7 +45,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=105:numPatients
+for fn=1:1
     fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
