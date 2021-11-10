@@ -28,7 +28,7 @@ git clone https://github.com/alphanumericslab/OSET.git
 git clone https://github.com/cliffordlab/QTestimation.git
 ```
 
-- Add Dr. Qiao's QT estimator folder to Matlab path
+- Add Dr. Li's QT estimator folder to Matlab path
 addpath('C:\Users\you\yourFolder\yourFolder\QTestimation\QTestimation\QT_for_Alivecor\')
 
 - To add the dataset you want QT measured in with the number of channels:
