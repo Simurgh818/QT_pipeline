@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% QT Measurement Pipeline ECG signal
+% QT Measurement PipeLie ECG signal
 % 
 % Syntax:
 % 
@@ -19,7 +19,7 @@
 %
 % 1- Non-model method: Dr. Li wavelet method
 %  https://github.com/cliffordlab/QTestimation.git
-% Add Dr. Lin's QT estimator folder to Matlab path
+% Add Dr. Li's QT estimator folder to Matlab path
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\QTestimation\QTestimation\QT_for_Alivecor\')
 %
 % 2- Add Mr. Fattahi's QT folder to Matlab path
@@ -45,8 +45,8 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=1:numPatients
-
+for fn=105:numPatients
+    fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
     for rn=1:numRecords
@@ -54,7 +54,7 @@ for fn=1:numPatients
         inPath = ['ptbdb/', folderNames(fn,:),'/', baseFileName];
 
         outPath = 'preprocessed.csv';
-        fs = preprocessing(inPath, outPath, nChannels);
+        [fs] = preprocessing(inPath, outPath, nChannels);
 
         processedPath = outPath; 
         [fPath,fName,fExt]=fileparts(inPath);
@@ -63,7 +63,7 @@ for fn=1:numPatients
             mkdir(figPath)
         end
 
-        [Lin, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
+        [Li, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
         
     end
 end
