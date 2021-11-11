@@ -1,13 +1,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QT Measurement PipeLie ECG signal
 % 
-% Syntax:
+% Syntax: main_pipe
 % 
 % 
 % Inputs:
 % 
+% set database path:
+dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/ptbdb/';
+nChannels = 14; % number of channels to read
 % 
-% Output:
+% set results path:
+results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
+% 
+% Output: It saves scatter plot for each record in a subfolder of each 
+%         subject in the results_path. It also saves a CSV with the
+%         following measurements for Gaussian model correct QT: median, mean, median IQR,
+%         mean RR and median RR. Also, for the wavelet method correct QT:
+%         median, median IQR, gauss jQRS, Median RR, jQRS RR.
 % 
 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -26,12 +36,7 @@
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
 %
-% set database path:
-dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/ptbdb/';
-nChannels = 14; % number of channels to read
 %
-% set results path:
-results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 % 
 % This program is free software; you can redistribute it and/or modify it
 % under the terms of the GNU General Public License as published by the
@@ -45,7 +50,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=51:numPatients
+for fn=1:1
     fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);

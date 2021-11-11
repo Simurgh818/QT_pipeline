@@ -2,7 +2,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Whole Dataset Stats:
 % 
-% Syntax:
+% Syntax: whole_dataset_stats
 % 
 % 
 % Inputs:

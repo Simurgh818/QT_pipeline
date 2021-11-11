@@ -33,11 +33,11 @@ QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
 Li.MeanQT_jQRS=[]; Li.MedianQT_wavelet=[]; 
 Li.MedianQT_wavelet_SQI=[]; Li.GaussQT_jQRS=[]; 
-Li.GaussQT_wavelet=[];
+Li.GaussQT_SQI=[];
 Li.RR_jQRS=[]; Li.MedianRR_wavelet=[]; Li.MeanRR_wavelet=[];
 Li.MedianQT_IQR=[]; Li.MeanQTlc_jQRS=[]; Li.MedianQTlc_wavelet=[];
 Li.MedianQTlc_wavelet_SQI=[]; Li.GaussQTlc_jQRS=[]; 
-Li.GaussQTlc_wavelet=[]; Li.MedianQTlc_IQR=[];
+Li.GaussQTlc_SQI=[]; Li.MedianQTlc_IQR=[];
 
 Fattahi.MeanQT=[]; Fattahi.MedianQT = []; 
 Fattahi.MeanRR=[]; Fattahi.MedianRR = []; Fattahi.MedianQT_IQR = [];
@@ -53,7 +53,7 @@ Li.MeanQT_jQRS = QT(:,1)/fs;
 Li.MedianQT_wavelet = QT(:,2)/fs;
 Li.MedianQT_wavelet_SQI = QT(:,3)/fs;
 Li.GaussQT_jQRS = QT(:,4)/fs;
-Li.GaussQT_wavelet = QT(:,5)/fs;
+Li.GaussQT_SQI = QT(:,5)/fs;
 
 
 
@@ -75,7 +75,7 @@ Li.GaussQTlc_jQRS = Li.GaussQT_jQRS + 0.154*(1-Li.RR_jQRS);
 
 Li.MedianQTlc_wavelet = Li.MedianQT_wavelet + 0.154*(1-Li.MedianRR_wavelet);
 Li.MedianQTlc_wavelet_SQI = Li.MedianQT_wavelet_SQI + 0.154*(1-Li.MedianRR_wavelet);
-Li.GaussQTlc_wavelet = Li.GaussQT_wavelet + + 0.154*(1-Li.MedianRR_wavelet);
+Li.GaussQTlc_SQI = Li.GaussQT_SQI + + 0.154*(1-Li.MedianRR_wavelet);
 Li.MedianQTlc_IQR = Li.MedianQT_IQR + 0.154*(1-Li.MedianRR_wavelet);
 
 md_QT_Qiao = Li.MedianQTlc_wavelet'; %for the plot
@@ -177,11 +177,11 @@ close all;
 
 % colName = 'channelNum';
 Li_colNames = {'channelNum', 'MedianQTlc_wavelet', 'MedianQTlc_wavelet_SQI',...
-    'GaussQTlc_wavelet', 'MedianQTlc_IQR', 'MeanQTlc_jQRS','GaussQTlc_jQRS',...
+    'GaussQTlc_SQI', 'MedianQTlc_IQR', 'MeanQTlc_jQRS','GaussQTlc_jQRS',...
     'RR_jQRS', 'MedianRR_wavelet'};
 channelNum = [1:nChannels]';
 Li_table = table(channelNum, Li.MedianQTlc_wavelet, Li.MedianQTlc_wavelet_SQI,...
-    Li.GaussQTlc_wavelet, Li.MedianQTlc_IQR, Li.MeanQTlc_jQRS,... 
+    Li.GaussQTlc_SQI, Li.MedianQTlc_IQR, Li.MeanQTlc_jQRS,... 
     Li.GaussQTlc_jQRS, Li.RR_jQRS, Li.MedianRR_wavelet,'VariableNames',Li_colNames);
 
 Fattahi_colNames = {'channelNum', 'MedianQTlc', 'MeanQTlc', 'MedianQTlc_IQR',...

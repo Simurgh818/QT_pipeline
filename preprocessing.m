@@ -4,10 +4,12 @@ function [fs] = preprocessing(inPath, outPath, nChannels)
 % Preprocessing ECG signal
 % 
 % Syntax:
-% 
+%        [fs] = preprocessing(inPath, outPath, nChannels);
 % 
 % Inputs:
-% 
+%        inPath: input path to the database on WFDB to download, for
+%        example: 'ptbdb/patient001/s0014lre'
+%               
 % 
 % Output:
 % 
