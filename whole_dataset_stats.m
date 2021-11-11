@@ -47,7 +47,7 @@ QT.MedianQTlc_IQR_Fattahi=[]; QT.MedianQTlc_IQR_Li=[];
 % rows = numPatients;
 % QT = cell(rows);
 
-for fn=1:numPatients
+for fn=1:50
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.csv'));
     [numRecords, ~] = size(recordNames);
@@ -60,26 +60,63 @@ for fn=1:numPatients
         opts = detectImportOptions(inPath);
         opts.SelectedVariableNames = colToRead;
         QT_read = readtable(inPath, opts);
-%         TODO: use a structure instead
 
-%         QT_table = table({folderNames(fn,:)}, {baseFileName},...
-%             table2cell(QT(1,1)), table2cell(QT(1,2)),...
-%             'VariableNames', QT_table_colNames);
-        row = fn*rn;
         QT.subject(end+1,1) = {folderNames(fn,:)};
         QT.record(end+1,1) = {baseFileName(1:8)};
         QT.MedianQTlc_IQR_Fattahi(end+1,1) = table2array(QT_read(1,1));
         QT.MedianQTlc_IQR_Li(end+1,1) = table2array(QT_read(1,2));
 
-%         QT_m = table2array(QT(1,:));
-%         QT_record = [folderNames; rn; ]
         
     end
 end
 disp(QT)
+%% General Stat measurements
+
+% Discriptive stats
+mean_Fattahi = mean(QT.MedianQTlc_IQR_Fattahi);
+mean_Li = mean(QT.MedianQTlc_IQR_Li);
+
+trimMean_Fattahi = trimmean(QT.MedianQTlc_IQR_Fattahi, 10);
+trimMean_Li = trimmean(QT.MedianQTlc_IQR_Li, 10);
+
+median_Fattahi = median(QT.MedianQTlc_IQR_Fattahi);
+median_Li = median(QT.MedianQTlc_IQR_Li);
+
+mode_Fattahi = mode(QT.MedianQTlc_IQR_Fattahi);
+mode_Li = mode(QT.MedianQTlc_IQR_Li);
+
+range_Fattahi = range(QT.MedianQTlc_IQR_Fattahi);
+range_Li = range(QT.MedianQTlc_IQR_Li);
+
+std_Fattahi = std(QT.MedianQTlc_IQR_Fattahi);
+std_Li = std(QT.MedianQTlc_IQR_Li);
+
+% printing table
+QT_discriptive_stats = {'Mean', 'Trimmed Mean', 'Median', 'Mode', 'Range',...
+    'Standard Deviation'};
+QTlc_Gaussian = [mean_Fattahi trimMean_Fattahi median_Fattahi mode_Fattahi ...
+    range_Fattahi std_Fattahi]';
+QTlc_Wavelet = [median_Li trimMean_Li median_Li mode_Li range_Li std_Li]';
+
+[discriptive_stats] = table(QTlc_Wavelet, QTlc_Gaussian, 'RowNames',QT_discriptive_stats)
+
+% Calculate Box plot stats
+
+% iqr
+
+% mean
+
+% iqr lower
+
+%iqr upper
+
+% box plot stats table
+
+
 %% Box plot
-boxplot([QT.MedianQTlc_IQR_Fattahi, QT.MedianQTlc_IQR_Li])
-xlabel(['Median QTlc Fattahi ', ' Median QTlc Li']);
+
+boxplot([QT.MedianQTlc_IQR_Fattahi, QT.MedianQTlc_IQR_Li],...
+    'Labels',{'Median QTlc Fattahi ', ' Median QTlc Li'});
 ylabel('time (seconds)');
 title('PTB database Median QTlc')
 % outPath = 'stats.csv';
