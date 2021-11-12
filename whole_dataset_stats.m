@@ -31,7 +31,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 % Public License for more details.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 
-
+% ToDo: save the results in a CSV in the parent result folder.
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
@@ -47,7 +47,7 @@ QT.MedianQTlc_IQR_Fattahi=[]; QT.MedianQTlc_IQR_Li=[];
 % rows = numPatients;
 % QT = cell(rows);
 
-for fn=1:80
+for fn=1:numPatients
 
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.csv'));
     [numRecords, ~] = size(recordNames);
@@ -70,63 +70,26 @@ for fn=1:80
     end
 end
 disp(QT)
-%% General Stat measurements
+%% Stat measurements
 
-% Discriptive stats
-mean_Fattahi = mean(QT.MedianQTlc_IQR_Fattahi);
-mean_Li = mean(QT.MedianQTlc_IQR_Li);
+% Chi-squared Test
 
-trimMean_Fattahi = trimmean(QT.MedianQTlc_IQR_Fattahi, 10);
-trimMean_Li = trimmean(QT.MedianQTlc_IQR_Li, 10);
+% chi-squared probability density function distribution
+x = 1:size(QT.MedianQTlc_IQR_Fattahi);
 
-median_Fattahi = median(QT.MedianQTlc_IQR_Fattahi);
-median_Li = median(QT.MedianQTlc_IQR_Li);
 
-mode_Fattahi = mode(QT.MedianQTlc_IQR_Fattahi);
-mode_Li = mode(QT.MedianQTlc_IQR_Li);
 
-range_Fattahi = range(QT.MedianQTlc_IQR_Fattahi);
-range_Li = range(QT.MedianQTlc_IQR_Li);
+%% plot
 
-std_Fattahi = std(QT.MedianQTlc_IQR_Fattahi);
-std_Li = std(QT.MedianQTlc_IQR_Li);
-
-% printing table
-QT_discriptive_stats = {'Mean', 'Trimmed Mean', 'Median', 'Mode', 'Range',...
-    'Standard Deviation'};
-QTlc_Gaussian = [mean_Fattahi trimMean_Fattahi median_Fattahi mode_Fattahi ...
-    range_Fattahi std_Fattahi]';
-QTlc_Wavelet = [median_Li trimMean_Li median_Li mode_Li range_Li std_Li]';
-
-[discriptive_stats] = table(QTlc_Wavelet, QTlc_Gaussian, 'RowNames',QT_discriptive_stats)
-
-% Calculate Box plot stats
-
-% iqr
-iqr_Gassian = iqr(QT.MedianQTlc_IQR_Fattahi);
-iqr_Wavelet = iqr(QT.MedianQTlc_IQR_Li);
-
-%iqr lower
-iqr_Gassian_lower = prctile(QT.MedianQTlc_IQR_Fattahi, 25)-1.5*iqr_Gassian;
-iqr_Wavelet_lower = prctile(QT.MedianQTlc_IQR_Li, 25)-1.5*iqr_Wavelet;
-
-% iqr upper
-iqr_Gassian_upper = prctile(QT.MedianQTlc_IQR_Fattahi, 75)+1.5*iqr_Gassian;
-iqr_Wavelet_upper = prctile(QT.MedianQTlc_IQR_Li, 75)+1.5*iqr_Wavelet;
-
-% box plot stats table: relative statistics
-QT_relative_statistics = {'max','3rd IQR', 'Median','1st IQR', 'min'};
-QTlc_Gaussian_iqr = [max(QT.MedianQTlc_IQR_Fattahi) iqr_Gassian_upper...
-    median_Fattahi iqr_Gassian_lower min(QT.MedianQTlc_IQR_Fattahi)]';
-QTlc_Wavelet_iqr = [max(QT.MedianQTlc_IQR_Li) iqr_Wavelet_upper...
-    median_Li iqr_Wavelet_lower min(QT.MedianQTlc_IQR_Li)]';
-boxPlot_stats = table(QTlc_Wavelet_iqr, QTlc_Gaussian_iqr, 'RowNames',...
-    QT_relative_statistics)
-
-%% Box plot
-
-boxplot([QT.MedianQTlc_IQR_Li, QT.MedianQTlc_IQR_Fattahi],...
-    'Labels',{'Median QTlc Wavelet', 'Median QTlc Gaussian'});
-ylabel('time (seconds)');
-title('PTB database Median QTlc')
 % outPath = 'stats.csv';
+
+figure(2)
+scatter(x, QT.MedianQTlc_IQR_Fattahi, 'r', 'filled');
+ylabel('Second')
+title('The Gaussian Model distribution for Median QTlc IQR')
+
+figure(3)
+x2 = size(QT.MedianQTlc_IQR_Li);
+scatter(1:x2, QT.MedianQTlc_IQR_Li, 'b', 'filled');
+ylabel('Second')
+title('The Wavelet method distribution for Median QTlc IQR')
