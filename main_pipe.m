@@ -50,11 +50,11 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
-for fn=176:numPatients
+for fn=2:2
     fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
-    for rn=1:numRecords
+    for rn=2:numRecords
         [~, baseFileName, extension] = fileparts(recordNames(rn, :));
         inPath = ['ptbdb/', folderNames(fn,:),'/', baseFileName];
 
@@ -72,6 +72,8 @@ for fn=176:numPatients
         
     end
 end
+
+QT = whole_dataset_stats(results_path);
 
 % TODO: add a whole dataset boxplot
 

@@ -1,3 +1,4 @@
+function [QT] = whole_dataset_stats(results_path)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Whole Dataset Stats:
@@ -36,8 +37,7 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
 
-QT_table_colNames = {'subject','record', 'MedianQTlc_IQR_Fattahi',...
-    'MedianQTlc_IQR_Li'};
+
 colToRead = {'MedianQTlc_IQR_Fattahi_table',...
             'MedianQTlc_IQR_Li_table'};
 
@@ -75,21 +75,57 @@ disp(QT)
 % Chi-squared Test
 
 % chi-squared probability density function distribution
-x = 1:size(QT.MedianQTlc_IQR_Fattahi);
+[Gaussian_size ,~] = size(QT.MedianQTlc_IQR_Fattahi);
+x = 1:Gaussian_size;
+y = chi2pdf(x,1);
 
+% Normal distribution check: 
+[h, p] = chi2gof(QT.MedianQTlc_IQR_Fattahi,'Alpha',0.01);
+[h2, p2] = chi2gof(QT.MedianQTlc_IQR_Li, 'Alpha',0.01);
+if h==1 && h2==1
+    disp('reject null hypothesis, not a normal distribution');
+    fprintf('The Gaussian p-value is %d, and the Wavelet p-value is %d.',...
+        p, p2);
+else
+    disp('null hypotheiss not reject, a normal distribution.');
+end
 
+% chi-squared test:
+% chi_sqrd = sum((QT.MedianQTlc_IQR_Fattahi-QT.MedianQTlc_IQR_Li).^2/...
+%     QT.MedianQTlc_IQR_Fattahi,[1, Gaussian_size]);
+% if chi_sqrd == 0
+%     disp('No difference between Gaussian and Wavelet')
+% else
+%     disp('There is a difference by chi-squared method')
+% end
 
 %% plot
 
-% outPath = 'stats.csv';
-
-figure(2)
-scatter(x, QT.MedianQTlc_IQR_Fattahi, 'r', 'filled');
-ylabel('Second')
-title('The Gaussian Model distribution for Median QTlc IQR')
+% figure(1)
+% scatter(x, QT.MedianQTlc_IQR_Fattahi, 'r', 'filled');
+% ylabel('Second')
+% title('The Gaussian Model distribution for Median QTlc IQR')
+% 
+% figure(2)
+% x2 = size(QT.MedianQTlc_IQR_Li);
+% scatter(1:x2, QT.MedianQTlc_IQR_Li, 'b', 'filled');
+% ylabel('Second')
+% title('The Wavelet method distribution for Median QTlc IQR')
 
 figure(3)
-x2 = size(QT.MedianQTlc_IQR_Li);
-scatter(1:x2, QT.MedianQTlc_IQR_Li, 'b', 'filled');
-ylabel('Second')
-title('The Wavelet method distribution for Median QTlc IQR')
+plot(x,y);
+xlabel('observations')
+ylabel('probability density')
+%% Save results for the whole dataset in a CSV
+
+
+QT_table_colNames = {'subject','record', 'MedianQTlc_IQR_Fattahi',...
+    'MedianQTlc_IQR_Li'};
+QT_table = table(QT.subject, QT.record, QT.MedianQTlc_IQR_Fattahi, ...
+    QT.MedianQTlc_IQR_Li, 'VariableNames',QT_table_colNames);
+
+
+csv_fileName = 'QT_stats.csv';
+fileName = fullfile(results_path, csv_fileName);
+writetable(QT_table, fileName);
+end
