@@ -7,6 +7,9 @@
 % Inputs:
 % 
 % set database path:
+clear
+close all;
+
 dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/ptbdb/';
 nChannels = 14; % number of channels to read
 % 
@@ -54,7 +57,7 @@ for fn=2:2
     fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
     recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
     [numRecords, ~] = size(recordNames);
-    for rn=2:numRecords
+    for rn=1:numRecords
         [~, baseFileName, extension] = fileparts(recordNames(rn, :));
         inPath = ['ptbdb/', folderNames(fn,:),'/', baseFileName];
 
@@ -67,13 +70,13 @@ for fn=2:2
         if ~exist(figPath, 'dir')
             mkdir(figPath)
         end
-
-        [Li, Fattahi] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
+%       Method_1: Fattahi
+%       Method_2: Li    
+        [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
         
     end
 end
 
 QT = whole_dataset_stats(results_path);
 
-% TODO: add a whole dataset boxplot
 

@@ -52,28 +52,6 @@ b_mn = BaseLine1(data, wlen,'mn');
 
 data_base_cor = data - b_md;
 
-
-%% Check to see if Powerline noise is present
-
-% TODO: use periodogram to see if there is a peak at 50 or 60 Hz.
-% add an if statement to remove power noise if there is a peak
-% [L, ~] = size(data_base_cor); %length of the signal
-% 
-% data_base_cor_f_two_sided = fft(data_base_cor);
-% dbc_two_sided = abs(data_base_cor_f_two_sided/L);
-% dbc_one_side = dbc_two_sided(1:L/2+1);
-% dbc_one_side(2:end-1) = 2*dbc_one_side(2:end-1);
-% f = fs*(0:(L/2)) /L;
-
-% figure()
-% % periodogram(data_base_cor)]
-% plot(f, dbc_one_side)
-% title('Single sided amplitute spectrum of base corrected signal')
-% xlabel('f(Hz)')
-% ylabel('|X|');
-% Don't see a peak at 50 or 60 Hz, don't need to do power line noise
-% cancellation
-
 %% Powerline noise cancellation
 % notch filter design
 
@@ -98,6 +76,28 @@ y = filter(b, a, x);
 % % title("The channel signal after powerline noise filter");
 % figure()
 % periodogram(y)
+
+
+% Check to see if Powerline noise is present
+
+% TODO: use periodogram to see if there is a peak at 50 or 60 Hz.
+% add an if statement to remove power noise if there is a peak
+% [L, ~] = size(data_base_cor); %length of the signal
+% 
+% data_base_cor_f_two_sided = fft(data_base_cor);
+% dbc_two_sided = abs(data_base_cor_f_two_sided/L);
+% dbc_one_side = dbc_two_sided(1:L/2+1);
+% dbc_one_side(2:end-1) = 2*dbc_one_side(2:end-1);
+% f = fs*(0:(L/2)) /L;
+
+% figure()
+% % periodogram(data_base_cor)]
+% plot(f, dbc_one_side)
+% title('Single sided amplitute spectrum of base corrected signal')
+% xlabel('f(Hz)')
+% ylabel('|X|');
+% Don't see a peak at 50 or 60 Hz, don't need to do power line noise
+% cancellation
 %% CSV write
 
 csvwrite(outPath, y');
