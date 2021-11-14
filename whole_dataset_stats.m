@@ -38,12 +38,12 @@ folderNames = ls(fullfile(dbPath, '*patient*'));
 [numPatients, ~] = size(folderNames);
 
 
-colToRead = {'MedianQTlc_IQR_Method_1_table',...
-            'MedianQTlc_IQR_Method_2_table'};
+colToRead = {'QTc1_median_IQR_Method_1_table',...
+            'QTc1_median_IQR_Method_2_table'};
 
 % TODO: use datastructure to collect QTs
 QT.subject={}; QT.record={};
-QT.MedianQTlc_IQR_Method_1=[]; QT.MedianQTlc_IQR_Method_2=[];
+QT.QTc1_median_IQR_Method_1=[]; QT.QTc1_median_IQR_Method_2=[];
 % rows = numPatients;
 % QT = cell(rows);
 
@@ -63,8 +63,8 @@ for fn=2:2
 
         QT.subject(end+1,1) = {folderNames(fn,:)};
         QT.record(end+1,1) = {baseFileName(1:8)};
-        QT.MedianQTlc_IQR_Method_1(end+1,1) = table2array(QT_read(1,1));
-        QT.MedianQTlc_IQR_Method_2(end+1,1) = table2array(QT_read(1,2));
+        QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(1,1));
+        QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(1,2));
 
         
     end
@@ -75,13 +75,13 @@ disp(QT)
 % Chi-squared Test
 
 % chi-squared probability density function distribution
-[Gaussian_size ,~] = size(QT.MedianQTlc_IQR_Method_1);
+[Gaussian_size ,~] = size(QT.QTc1_median_IQR_Method_1);
 x = 1:Gaussian_size;
 y = chi2pdf(x,1);
 
 % Normal distribution check: 
-[h, p] = chi2gof(QT.MedianQTlc_IQR_Method_1,'Alpha',0.01);
-[h2, p2] = chi2gof(QT.MedianQTlc_IQR_Method_2, 'Alpha',0.01);
+[h, p] = chi2gof(QT.QTc1_median_IQR_Method_1,'Alpha',0.01);
+[h2, p2] = chi2gof(QT.QTc1_median_IQR_Method_2, 'Alpha',0.01);
 if h==1 && h2==1
     disp('reject null hypothesis, not a normal distribution');
     fprintf('The Gaussian p-value is %d, and the Wavelet p-value is %d.\n',...
@@ -91,8 +91,8 @@ else
 end
 
 % chi-squared test:
-% chi_sqrd = sum((QT.MedianQTlc_IQR_Method_1-QT.MedianQTlc_IQR_Method_2).^2/...
-%     QT.MedianQTlc_IQR_Method_1,[1, Gaussian_size]);
+% chi_sqrd = sum((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_IQR_Method_2).^2/...
+%     QT.QTc1_median_IQR_Method_1,[1, Gaussian_size]);
 % if chi_sqrd == 0
 %     disp('No difference between Gaussian and Wavelet')
 % else
@@ -102,13 +102,13 @@ end
 %% plot
 
 % figure(1)
-% scatter(x, QT.MedianQTlc_IQR_Method_1, 'r', 'filled');
+% scatter(x, QT.QTc1_median_IQR_Method_1, 'r', 'filled');
 % ylabel('Second')
 % title('The Gaussian Model distribution for Median QTlc IQR')
 % 
 % figure(2)
-% x2 = size(QT.MedianQTlc_IQR_Method_2);
-% scatter(1:x2, QT.MedianQTlc_IQR_Method_2, 'b', 'filled');
+% x2 = size(QT.QTc1_median_IQR_Method_2);
+% scatter(1:x2, QT.QTc1_median_IQR_Method_2, 'b', 'filled');
 % ylabel('Second')
 % title('The Wavelet method distribution for Median QTlc IQR')
 
@@ -119,10 +119,10 @@ end
 %% Save results for the whole dataset in a CSV
 
 
-QT_table_colNames = {'subject','record', 'MedianQTlc_IQR_Method_1',...
-    'MedianQTlc_IQR_Method_2'};
-QT_table = table(QT.subject, QT.record, QT.MedianQTlc_IQR_Method_1, ...
-    QT.MedianQTlc_IQR_Method_2, 'VariableNames',QT_table_colNames);
+QT_table_colNames = {'subject','record', 'QTc1_median_IQR_Method_1',...
+    'QTc1_median_IQR_Method_2'};
+QT_table = table(QT.subject, QT.record, QT.QTc1_median_IQR_Method_1, ...
+    QT.QTc1_median_IQR_Method_2, 'VariableNames',QT_table_colNames);
 
 
 csv_fileName = 'QT_stats.csv';

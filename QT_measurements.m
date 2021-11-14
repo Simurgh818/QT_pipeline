@@ -31,17 +31,17 @@ data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
-Method_2.MeanQT_jQRS=[]; Method_2.MedianQT_wavelet=[]; 
-Method_2.MedianQT_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
+Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
+Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
-Method_2.RR_jQRS=[]; Method_2.MedianRR_wavelet=[]; Method_2.MeanRR_wavelet=[];
-Method_2.MedianQT_IQR=[]; Method_2.MeanQTlc_jQRS=[]; Method_2.MedianQTlc_wavelet=[];
-Method_2.MedianQTlc_wavelet_SQI=[]; Method_2.GaussQTlc_jQRS=[]; 
-Method_2.GaussQTlc_SQI=[]; Method_2.MedianQTlc_IQR=[];
+Method_2.RR_jQRS=[]; Method_2.RR_median_wavelet=[]; Method_2.RR_mean_wavelet=[];
+Method_2.QT_median_IQR=[]; Method_2.QTc1_mean_jQRS=[]; Method_2.QTc1_median_wavelet=[];
+Method_2.QTc1_median_wavelet_SQI=[]; Method_2.GaussQTlc_jQRS=[]; 
+Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
 
-Method_1.MeanQT=[]; Method_1.MedianQT = []; 
-Method_1.MeanRR=[]; Method_1.MedianRR = []; Method_1.MedianQT_IQR = [];
-Method_1.MeanQTlc=[]; Method_1.MedianQTlc=[]; Method_1.MedianQTlc_IQR=[];
+Method_1.QT_mean=[]; Method_1.QT_median = []; 
+Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
+Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
 for ch=1:nChannels
@@ -49,36 +49,36 @@ for ch=1:nChannels
 
 end
 
-Method_2.MeanQT_jQRS = QT(:,1)/fs;
-Method_2.MedianQT_wavelet = QT(:,2)/fs;
-Method_2.MedianQT_wavelet_SQI = QT(:,3)/fs;
+Method_2.QT_mean_jQRS = QT(:,1)/fs;
+Method_2.QT_median_wavelet = QT(:,2)/fs;
+Method_2.QT_median_wavelet_SQI = QT(:,3)/fs;
 Method_2.GaussQT_jQRS = QT(:,4)/fs;
 Method_2.GaussQT_SQI = QT(:,5)/fs;
 
 
 
 % Calculate median of interquartile range of 25-75%
-Method_2_IQR = iqr(Method_2.MedianQT_wavelet,1);
-Method_2_iqr_lower = prctile(Method_2.MedianQT_wavelet, 25)-Method_2_IQR; %calc lower IQR
-Method_2_iqr_upper = prctile(Method_2.MedianQT_wavelet, 75)+Method_2_IQR; %calc upper IQR
-Method_2_indecies = Method_2_iqr_lower<Method_2.MedianQT_wavelet & Method_2.MedianQT_wavelet <Method_2_iqr_upper;
-Method_2.MedianQT_IQR(1:nChannels, 1) = median(Method_2.MedianQT_wavelet(Method_2_indecies)); % median QT across the interquartile range
+Method_2_IQR = iqr(Method_2.QT_median_wavelet,1);
+Method_2_iqr_lower = prctile(Method_2.QT_median_wavelet, 25)-Method_2_IQR; %calc lower IQR
+Method_2_iqr_upper = prctile(Method_2.QT_median_wavelet, 75)+Method_2_IQR; %calc upper IQR
+Method_2_indecies = Method_2_iqr_lower<Method_2.QT_median_wavelet & Method_2.QT_median_wavelet <Method_2_iqr_upper;
+Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median_wavelet(Method_2_indecies)); % median QT across the interquartile range
 
 % RR = [rr_jQRS, medianRR_wavelet, meanRR_wavelet]
 Method_2.RR_jQRS = RR(:,1); 
-Method_2.MedianRR_wavelet =  RR(:,2);
-Method_2.MeanRR_wavelet =  RR(:,3); 
+Method_2.RR_median_wavelet =  RR(:,2);
+Method_2.RR_mean_wavelet =  RR(:,3); 
 
 % Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
-Method_2.MeanQTlc_jQRS = Method_2.MeanQT_jQRS + 0.154*(1-Method_2.RR_jQRS);
+Method_2.QTc1_mean_jQRS = Method_2.QT_mean_jQRS + 0.154*(1-Method_2.RR_jQRS);
 Method_2.GaussQTlc_jQRS = Method_2.GaussQT_jQRS + 0.154*(1-Method_2.RR_jQRS);
 
-Method_2.MedianQTlc_wavelet = Method_2.MedianQT_wavelet + 0.154*(1-Method_2.MedianRR_wavelet);
-Method_2.MedianQTlc_wavelet_SQI = Method_2.MedianQT_wavelet_SQI + 0.154*(1-Method_2.MedianRR_wavelet);
-Method_2.GaussQTlc_SQI = Method_2.GaussQT_SQI + + 0.154*(1-Method_2.MedianRR_wavelet);
-Method_2.MedianQTlc_IQR = Method_2.MedianQT_IQR + 0.154*(1-Method_2.MedianRR_wavelet);
+Method_2.QTc1_median_wavelet = Method_2.QT_median_wavelet + 0.154*(1-Method_2.RR_median_wavelet);
+Method_2.QTc1_median_wavelet_SQI = Method_2.QT_median_wavelet_SQI + 0.154*(1-Method_2.RR_median_wavelet);
+Method_2.GaussQTlc_SQI = Method_2.GaussQT_SQI + + 0.154*(1-Method_2.RR_median_wavelet);
+Method_2.QTc1_median_IQR = Method_2.QT_median_IQR + 0.154*(1-Method_2.RR_median_wavelet);
 
-md_QT_Qiao = Method_2.MedianQTlc_wavelet'; %for the plot
+md_QT_Qiao = Method_2.QTc1_median_wavelet'; %for the plot
 %% 2- Model Based method: Mr. Method_1
 % https://github.com/alphanumericslab/OSET/tree/master/UnderDevelopment/QTinterval
 
@@ -95,34 +95,34 @@ for ch=1:nChannels
     qc_indecies = 0.1<qtInt & qtInt<1;
     qtInt = qtInt(qc_indecies);
 
-    Method_1.MedianQT(ch,1)= nanmedian(qtInt(1,:));
-    Method_1.MeanQT(ch,1) = nanmean(qtInt(1,:));
-    Method_1.MeanRR(ch,1) = mean(diff(rPeaks)/fs);
-    Method_1.MedianRR(ch,1) = nanmedian(diff(rPeaks))/fs;
+    Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
+    Method_1.QT_mean(ch,1) = nanmean(qtInt(1,:));
+    Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs);
+    Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks))/fs;
 end
 
 % Calculate median of interquartile range of 25-75%
-Method_1_IQR = iqr(Method_1.MedianQT,1);
-Method_1_iqr_lower = prctile(Method_1.MedianQT, 25)-Method_1_IQR; %calc lower IQR
-Method_1_iqr_upper = prctile(Method_1.MedianQT, 75)+Method_1_IQR; %calc upper IQR
-Method_1_indecies = Method_1_iqr_lower<Method_1.MedianQT & Method_1.MedianQT<Method_1_iqr_upper;
-Method_1.MedianQT_IQR(1:nChannels, 1) = median(Method_1.MedianQT(Method_1_indecies)); % median QT across the interquartile range
+Method_1_IQR = iqr(Method_1.QT_median,1);
+Method_1_iqr_lower = prctile(Method_1.QT_median, 25)-Method_1_IQR; %calc lower IQR
+Method_1_iqr_upper = prctile(Method_1.QT_median, 75)+Method_1_IQR; %calc upper IQR
+Method_1_indecies = Method_1_iqr_lower<Method_1.QT_median & Method_1.QT_median<Method_1_iqr_upper;
+Method_1.QT_median_IQR(1:nChannels, 1) = median(Method_1.QT_median(Method_1_indecies)); % median QT across the interquartile range
 
 % Correcting QT based on Sagie's Linear regression method: QTlc = QT + 0.154(1-RR) 
-Method_1.MeanQTlc = Method_1.MeanQT + 0.154*(1-Method_1.MeanRR);
-Method_1.MedianQTlc = Method_1.MedianQT + 0.154*(1-Method_1.MedianRR);
-Method_1.MedianQTlc_IQR = Method_1.MedianQT_IQR + 0.154*(1-Method_1.MedianRR);
+Method_1.QTc1_mean = Method_1.QT_mean + 0.154*(1-Method_1.RR_mean);
+Method_1.QTc1_median = Method_1.QT_median + 0.154*(1-Method_1.RR_median);
+Method_1.QTc1_median_IQR = Method_1.QT_median_IQR + 0.154*(1-Method_1.RR_median);
 
 
-md_QT_Method_1 = Method_1.MedianQTlc;
+md_QT_Method_1 = Method_1.QTc1_median;
 
-% TODO: Calculate Mr. Method_1 MedianQT_SQI
+% TODO: Calculate Mr. Method_1 QT_median_SQI
 % Dr. Li uses Mbsqi_3 function to select beats, and sets RR <0.3 and >>3 to
 % NaN.
 %% Quality Control
 
-Method_1.MedianQTlc(Method_1.MedianQTlc>1 | Method_1.MedianQTlc<0.1)=NaN;
-Method_1.MeanQTlc(Method_1.MeanQTlc>1 | Method_1.MeanQTlc<0.1)=NaN;
+Method_1.QTc1_median(Method_1.QTc1_median>1 | Method_1.QTc1_median<0.1)=NaN;
+Method_1.QTc1_mean(Method_1.QTc1_mean>1 | Method_1.QTc1_mean<0.1)=NaN;
 
 md_QT_Method_1(md_QT_Method_1>1 | md_QT_Method_1<0.1) = NaN;
 %% Plotting Dr. Method_2 vs. Mr. Method_1 QT measurments
@@ -176,19 +176,19 @@ close all;
 %% save results as a csv
 
 % colName = 'channelNum';
-Method_2_colNames = {'channelNum', 'MedianQTlc_wavelet', 'MedianQTlc_wavelet_SQI',...
-    'GaussQTlc_SQI', 'MedianQTlc_IQR', 'MeanQTlc_jQRS','GaussQTlc_jQRS',...
-    'RR_jQRS', 'MedianRR_wavelet'};
+Method_2_colNames = {'channelNum', 'QTc1_median_wavelet', 'QTc1_median_wavelet_SQI',...
+    'GaussQTlc_SQI', 'QTc1_median_IQR', 'QTc1_mean_jQRS','GaussQTlc_jQRS',...
+    'RR_jQRS', 'RR_median_wavelet'};
 channelNum = [1:nChannels]';
-Method_2_table = table(channelNum, Method_2.MedianQTlc_wavelet, Method_2.MedianQTlc_wavelet_SQI,...
-    Method_2.GaussQTlc_SQI, Method_2.MedianQTlc_IQR, Method_2.MeanQTlc_jQRS,... 
-    Method_2.GaussQTlc_jQRS, Method_2.RR_jQRS, Method_2.MedianRR_wavelet,'VariableNames',Method_2_colNames);
+Method_2_table = table(channelNum, Method_2.QTc1_median_wavelet, Method_2.QTc1_median_wavelet_SQI,...
+    Method_2.GaussQTlc_SQI, Method_2.QTc1_median_IQR, Method_2.QTc1_mean_jQRS,... 
+    Method_2.GaussQTlc_jQRS, Method_2.RR_jQRS, Method_2.RR_median_wavelet,'VariableNames',Method_2_colNames);
 
-Method_1_colNames = {'channelNum', 'MedianQTlc', 'MeanQTlc', 'MedianQTlc_IQR',...
-    'MedianRR', 'MeanRR'};
+Method_1_colNames = {'channelNum', 'QTc1_median', 'QTc1_mean', 'QTc1_median_IQR',...
+    'RR_median', 'RR_mean'};
 
-Method_1_table = table(channelNum, Method_1.MedianQTlc, Method_1.MeanQTlc,...
-    Method_1.MedianQTlc_IQR, Method_1.MedianRR, Method_1.MeanRR,...
+Method_1_table = table(channelNum, Method_1.QTc1_median, Method_1.QTc1_mean,...
+    Method_1.QTc1_median_IQR, Method_1.RR_median, Method_1.RR_mean,...
     'VariableNames', Method_1_colNames);
 
 joined_tables = join(Method_1_table, Method_2_table, 'keys', 'channelNum');

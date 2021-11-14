@@ -40,6 +40,8 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 % addpath('C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\GitRepos\OSET\UnderDevelopment\QTinterval');
 %
 %
+%       Method_1: Fattahi Gaussian model
+%       Method_2: Li wavelet method  
 % 
 % This program is free software; you can redistribute it and/or modify it
 % under the terms of the GNU General Public License as published by the
