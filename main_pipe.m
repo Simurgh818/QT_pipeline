@@ -10,12 +10,12 @@
 clear
 close all;
 
-dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/ptbdb/';
-nChannels = 14; % number of channels to read
+dbPath = 'C:\Users\sinad\wfdb\10.6.2\database\qtdb\physionet.org\files\qtdb';
+nChannels = 2; % number of channels to read
 % 
 % set results path:
-results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
-% 
+results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results\QTdb_results';
+ 
 % Output: It saves scatter plot for each record in a subfolder of each 
 %         subject in the results_path. It also saves a CSV with the
 %         following measurements for Gaussian model correct QT: median, mean, median IQR,
@@ -53,32 +53,51 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 % Public License for more details.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-folderNames = ls(fullfile(dbPath, '*patient*'));
+% ToDo: Need to generalize a way to list patient/subject subfolders for the
+% case there is subfolder and the case there is no subfolders
+
+% folderNames = ls(fullfile(dbPath));
+dirNames = dir(fullfile(dbPath));
+folderNames = dirNames([dirNames(:).isdir]);
+folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
+
 [numPatients, ~] = size(folderNames);
-for fn=2:2
-    fprintf('Currently Processing subject: %s \n', folderNames(fn,:));
-    recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.dat'));
-    [numRecords, ~] = size(recordNames);
-    for rn=1:numRecords
-        [~, baseFileName, extension] = fileparts(recordNames(rn, :));
-        inPath = ['ptbdb/', folderNames(fn,:),'/', baseFileName];
+try
 
-        outPath = 'preprocessed.csv';
-        [fs] = preprocessing(inPath, outPath, nChannels);
+    for fn=1:numPatients
+        fprintf('Currently Processing subject: %s \n', folderNames(fn,:).name);
+        recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
-        processedPath = outPath; 
-        [fPath,fName,fExt]=fileparts(inPath);
-        figPath = fullfile(results_path, folderNames(fn,:));
-        if ~exist(figPath, 'dir')
-            mkdir(figPath)
+        [numRecords, ~] = size(recordNames);
+        for rn=1:numRecords
+            fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
+            [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
+            pathSplit = split(dbPath, '\');
+            inPath = [pathSplit{end, 1}, '/', folderNames(fn,:).name,'/', baseFileName];
+    
+            outPath = 'preprocessed.csv';
+            [fs] = preprocessing(inPath, outPath, nChannels);
+    
+            processedPath = outPath; 
+            [fPath,fName,fExt]=fileparts(inPath);
+            figPath = fullfile(results_path, folderNames(fn,:).name);
+            if ~exist(figPath, 'dir')
+                mkdir(figPath)
+            end
+    %       Method_1: Fattahi
+    %       Method_2: Li    
+            [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
+            
         end
-%       Method_1: Fattahi
-%       Method_2: Li    
-        [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
-        
     end
+
+catch
+    if isempty(folderNames)
+        fprintf('Dataset did not load properly. Please check the path.');
+    end
+
 end
 
-QT = whole_dataset_stats(results_path);
+% QT = whole_dataset_stats(results_path);
 
 

@@ -49,7 +49,7 @@ QT.QTc1_median_IQR_Method_1=[]; QT.QTc1_median_IQR_Method_2=[];
 
 for fn=2:2
 
-    recordNames = ls(fullfile(dbPath, folderNames(fn,:),'s0*.csv'));
+    recordNames = ls(fullfile(dbPath, folderNames(fn,:),'*.csv'));
     [numRecords, ~] = size(recordNames);
     
    
