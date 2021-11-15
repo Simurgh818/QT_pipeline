@@ -10,7 +10,7 @@ function [QT] = whole_dataset_stats(results_path)
 % set results path:
 
 
-dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
+dbPath = results_path;
 % results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 
 % 
@@ -34,7 +34,9 @@ dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandS
 %% 
 % ToDo: save the results in a CSV in the parent result folder.
 
-folderNames = ls(fullfile(dbPath, '*patient*'));
+dirNames = dir(fullfile(dbPath));
+folderNames = dirNames([dirNames(:).isdir]);
+folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 [numPatients, ~] = size(folderNames);
 
 
@@ -47,21 +49,20 @@ QT.QTc1_median_IQR_Method_1=[]; QT.QTc1_median_IQR_Method_2=[];
 % rows = numPatients;
 % QT = cell(rows);
 
-for fn=2:2
-
-    recordNames = ls(fullfile(dbPath, folderNames(fn,:),'*.csv'));
+for fn=1:numPatients
+    recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.csv'));
     [numRecords, ~] = size(recordNames);
     
    
     for rn=1:numRecords
-        [~, baseFileName, extension] = fileparts(recordNames(rn, :));
-        inPath = fullfile(dbPath, folderNames(fn,:), [baseFileName,extension]);
+        [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
+        inPath = fullfile(dbPath, folderNames(fn,:).name, [baseFileName,extension]);
         
         opts = detectImportOptions(inPath);
         opts.SelectedVariableNames = colToRead;
         QT_read = readtable(inPath, opts);
 
-        QT.subject(end+1,1) = {folderNames(fn,:)};
+        QT.subject(end+1,1) = {folderNames(fn,:).name};
         QT.record(end+1,1) = {baseFileName(1:8)};
         QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(1,1));
         QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(1,2));
@@ -80,8 +81,8 @@ x = 1:Gaussian_size;
 y = chi2pdf(x,1);
 
 % Normal distribution check: 
-[h, p] = chi2gof(QT.QTc1_median_IQR_Method_1,'Alpha',0.01);
-[h2, p2] = chi2gof(QT.QTc1_median_IQR_Method_2, 'Alpha',0.01);
+[h, p] = chi2gof(QT.QTc1_median_IQR_Method_1,'Alpha',0.05);
+[h2, p2] = chi2gof(QT.QTc1_median_IQR_Method_2, 'Alpha',0.05);
 if h==1 && h2==1
     disp('reject null hypothesis, not a normal distribution');
     fprintf('The Gaussian p-value is %d, and the Wavelet p-value is %d.\n',...
@@ -101,16 +102,16 @@ end
 
 %% plot
 
-% figure(1)
-% scatter(x, QT.QTc1_median_IQR_Method_1, 'r', 'filled');
-% ylabel('Second')
-% title('The Gaussian Model distribution for Median QTlc IQR')
-% 
-% figure(2)
-% x2 = size(QT.QTc1_median_IQR_Method_2);
-% scatter(1:x2, QT.QTc1_median_IQR_Method_2, 'b', 'filled');
-% ylabel('Second')
-% title('The Wavelet method distribution for Median QTlc IQR')
+figure(1)
+scatter(x, QT.QTc1_median_IQR_Method_1, 'r', 'filled');
+ylabel('Second')
+title('The Gaussian Model distribution for Median QTlc IQR')
+
+figure(2)
+x2 = size(QT.QTc1_median_IQR_Method_2);
+scatter(1:x2, QT.QTc1_median_IQR_Method_2, 'b', 'filled');
+ylabel('Second')
+title('The Wavelet method distribution for Median QTlc IQR')
 
 % figure(3)
 % plot(x,y);

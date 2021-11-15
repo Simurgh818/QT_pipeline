@@ -10,7 +10,7 @@
 clear
 close all;
 
-dbPath = 'C:\Users\sinad\wfdb\10.6.2\database\qtdb\physionet.org\files\qtdb';
+dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/qtdb/physionet.org/files/qtdb';
 nChannels = 2; % number of channels to read
 % 
 % set results path:
@@ -98,6 +98,6 @@ catch
 
 end
 
-% QT = whole_dataset_stats(results_path);
+QT = whole_dataset_stats(results_path);
 
 
