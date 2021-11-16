@@ -31,6 +31,8 @@ data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
+Method_2.QR_mean=[]; Method_2.QR_median=[];
+Method_2.RT_mean=[]; Method_2.RT_median=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
 Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
@@ -44,10 +46,36 @@ Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
+% Calculating the Q start and T end of the wavelet method
+
+% QT by median QT of every beat
+heasig.nsig=1;
+
+heasig.spf = [1,1];
+heasig.spf_ecg = 1;
+
 for ch=1:nChannels
     [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs );
-
+    
+%     Calculating Q start and T end
+    % resample to 1000Hz
+    ecg=resample(data_base_cor_csv(:,ch),1000,fs);
+    heasig.freq=1000;
+    ecg=lp_filter_1000(ecg);
+    heasig.nsamp=length(ecg);
+    beats(ch,:)=wavedet_3D(ecg,[],heasig);
+%   ToDo: assign Method_2.RT and QR per channel in the loop
+    QR(ch,:)= beats(ch,:).QRSon;
+    RT(ch,:)= beats(ch,:).QRSon;
 end
+
+% Calculating Q Start and T end
+% QR = beats.QRSon;
+% RT = beats.Toff;
+Method_2.QR_mean = mean(QR);
+Method_2.RT_mean = mean(RT);
+
+
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
 fs2 = 1000;
