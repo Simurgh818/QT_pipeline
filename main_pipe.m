@@ -10,7 +10,7 @@
 clear
 close all;
 
-dbPath = 'C:/Users/sinad/wfdb/10.6.2/database/qtdb/physionet.org/files/qtdb';
+dbPath = 'C:\Users\sinad\wfdb\10.6.2\database\qtdb\physionet.org\files\qtdb';
 nChannels = 2; % number of channels to read
 % 
 % set results path:
@@ -62,41 +62,45 @@ folderNames = dirNames([dirNames(:).isdir]);
 folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 
 [numPatients, ~] = size(folderNames);
-try
 
-    for fn=1:numPatients
-        fprintf('Currently Processing subject: %s \n', folderNames(fn,:).name);
-        recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
-        [numRecords, ~] = size(recordNames);
-        for rn=1:numRecords
-            fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
-            [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
-            pathSplit = split(dbPath, '\');
-            inPath = [pathSplit{end, 1}, '/', folderNames(fn,:).name,'/', baseFileName];
-    
-            outPath = 'preprocessed.csv';
-            [fs] = preprocessing(inPath, outPath, nChannels);
-    
-            processedPath = outPath; 
-            [fPath,fName,fExt]=fileparts(inPath);
-            figPath = fullfile(results_path, folderNames(fn,:).name);
-            if ~exist(figPath, 'dir')
-                mkdir(figPath)
-            end
-    %       Method_1: Fattahi
-    %       Method_2: Li    
-            [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs);
-            
+for fn=1:numPatients
+    fprintf('Currently Processing subject: %s \n', folderNames(fn,:).name);
+    recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
+
+    [numRecords, ~] = size(recordNames);
+    for rn=1:1
+        fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
+        [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
+        pathSplit = split(dbPath, '\');
+        inPath = [pathSplit{end, 1}, '/', folderNames(fn,:).name,'/', baseFileName];
+
+        outPath = 'preprocessed.csv';
+        [fs] = preprocessing(inPath, outPath, nChannels);
+
+        processedPath = outPath; 
+        [fPath,fName,fExt]=fileparts(inPath);
+        figPath = fullfile(results_path, folderNames(fn,:).name);
+        if ~exist(figPath, 'dir')
+            mkdir(figPath)
         end
-    end
+%       Method_1: Fattahi
+%       Method_2: Li    
+        [Method_2, Method_1] = QT_measurements(outPath, fName, figPath, nChannels, fs);
+%         Reading human annotations
+%         hPath = 'C:/Users/sinad/wfdb/10.6.2/database/qtdb/physionet.org/files/qtdb/1.0.0/sel100.qt1';
+%         fileID = fopen(hPath);
+%         A = fread(fileID);
 
-catch
-    if isempty(folderNames)
-        fprintf('Dataset did not load properly. Please check the path.');
     end
-
 end
+
+% catch
+%     if isempty(folderNames)
+%         fprintf('Dataset did not load properly. Please check the path.');
+%     end
+% 
+% end
 
 QT = whole_dataset_stats(results_path);
 
