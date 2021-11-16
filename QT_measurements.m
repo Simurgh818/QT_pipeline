@@ -45,15 +45,17 @@ Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
 for ch=1:nChannels
-    [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs);
+    [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs );
 
 end
-
-Method_2.QT_mean_jQRS = QT(:,1)/fs;
-Method_2.QT_median_wavelet = QT(:,2)/fs;
-Method_2.QT_median_wavelet_SQI = QT(:,3)/fs;
-Method_2.GaussQT_jQRS = QT(:,4)/fs;
-Method_2.GaussQT_SQI = QT(:,5)/fs;
+% Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
+% to use this sampling frequency to convert to seconds
+fs2 = 1000;
+Method_2.QT_mean_jQRS = QT(:,1)/fs2;
+Method_2.QT_median_wavelet = QT(:,2)/fs2;
+Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2;
+Method_2.GaussQT_jQRS = QT(:,4)/fs2;
+Method_2.GaussQT_SQI = QT(:,5)/fs2;
 
 
 
@@ -90,15 +92,15 @@ soi = [];
 waveParams = [];
 
 for ch=1:nChannels
-    [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs);
+    [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs );
 %     Quality Control check to exclude QT <0.1 and >1 second
     qc_indecies = 0.1<qtInt & qtInt<1;
     qtInt = qtInt(qc_indecies);
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
     Method_1.QT_mean(ch,1) = nanmean(qtInt(1,:));
-    Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs);
-    Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks))/fs;
+    Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs );
+    Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks))/fs ;
 end
 
 % Calculate median of interquartile range of 25-75%
