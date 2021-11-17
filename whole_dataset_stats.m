@@ -8,10 +8,7 @@ function [QT] = whole_dataset_stats(results_path, numChannels)
 % 
 % Inputs:
 % set results path:
-
-
-dbPath = results_path;
-dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results\QTdb_results';
+% dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results\QTdb_results';
 % results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 
 % 
@@ -35,7 +32,7 @@ dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandS
 %% 
 % ToDo: save the results in a CSV in the parent result folder.
 
-dirNames = dir(fullfile(dbPath));
+dirNames = dir(fullfile(results_path));
 folderNames = dirNames([dirNames(:).isdir]);
 folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 [numPatients, ~] = size(folderNames);
@@ -58,13 +55,13 @@ QT.QTc1_median_IQR_Method_2=[];
 % QT = cell(rows);
 
 for fn=1:numPatients
-    recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.csv'));
+    recordNames = dir(fullfile(results_path, folderNames(fn,:).name,'*.csv'));
     [numRecords, ~] = size(recordNames);
     
    
     for rn=1:numRecords
         [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
-        inPath = fullfile(dbPath, folderNames(fn,:).name, [baseFileName,extension]);
+        inPath = fullfile(results_path, folderNames(fn,:).name, [baseFileName,extension]);
         
         opts = detectImportOptions(inPath);
         opts.SelectedVariableNames = colToRead;
