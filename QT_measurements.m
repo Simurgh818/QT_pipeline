@@ -65,6 +65,7 @@ for ch=1:nChannels
     heasig.nsamp=length(ecg);
     beats(ch,:)=wavedet_3D(ecg,[],heasig);
 %   ToDo: assign Method_2.RT and QR per channel in the loop
+%   ToDO: need to subtract R time to get QR time interval
     QR(ch,:)= beats(ch,:).QRSon;
     RT(ch,:)= beats(ch,:).QRSon;
 end
@@ -72,8 +73,8 @@ end
 % Calculating Q Start and T end
 % QR = beats.QRSon;
 % RT = beats.Toff;
-Method_2.QR_mean = mean(QR);
-Method_2.RT_mean = mean(RT);
+% Method_2.QR_mean = mean(QR);
+% Method_2.RT_mean = mean(RT);
 
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need

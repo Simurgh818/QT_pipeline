@@ -1,4 +1,4 @@
-function [QT] = whole_dataset_stats(results_path)
+function [QT] = whole_dataset_stats(results_path, numChannels)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Whole Dataset Stats:
@@ -11,6 +11,7 @@ function [QT] = whole_dataset_stats(results_path)
 
 
 dbPath = results_path;
+dbPath = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results\QTdb_results';
 % results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\CliffordandSameni\QT_results';
 
 % 
@@ -40,12 +41,19 @@ folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 [numPatients, ~] = size(folderNames);
 
 
-colToRead = {'QTc1_median_IQR_Method_1_table',...
-            'QTc1_median_IQR_Method_2_table'};
+colToRead = {'RR_mean','RR_median', 'QTc1_median', 'QTc1_mean',...
+    'QTc1_median_IQR_Method_1_table', 'RR_median_wavelet', 'RR_jQRS',...
+    'QTc1_median_wavelet', 'QTc1_median_wavelet_SQI', 'QTc1_mean_jQRS',...
+    'GaussQTlc_jQRS', 'GaussQTlc_SQI', 'QTc1_median_IQR_Method_2_table'};
 
 % TODO: use datastructure to collect QTs
-QT.subject={}; QT.record={};
-QT.QTc1_median_IQR_Method_1=[]; QT.QTc1_median_IQR_Method_2=[];
+QT.subject={}; QT.record={}; QT.channelNum=[] ; QT.RR_mean_method1=[];QT.RR_median_method1=[];
+QT.QTc1_median_method1=[]; QT.QTc1_mean_method1=[];
+QT.QTc1_median_IQR_Method_1=[]; 
+QT.RR_median_method2=[]; QT.RR_jQRS_method2=[];
+QT.QTc1_median_method2=[]; QT.QTc1_median_method2_SQI=[]; QT.QTc1_mean_method2_jQRS=[];
+QT.QTc1_jQRS_method2_Gauss=[]; QT.QTc1_jQRS_method2_Gauss_SQI=[];
+QT.QTc1_median_IQR_Method_2=[];
 % rows = numPatients;
 % QT = cell(rows);
 
@@ -61,13 +69,27 @@ for fn=1:numPatients
         opts = detectImportOptions(inPath);
         opts.SelectedVariableNames = colToRead;
         QT_read = readtable(inPath, opts);
-
-        QT.subject(end+1,1) = {folderNames(fn,:).name};
-        QT.record(end+1,1) = {baseFileName(1:8)};
-        QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(1,1));
-        QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(1,2));
-
         
+        for ch=1:numChannels
+    
+            QT.subject(end+1,1) = {folderNames(fn,:).name};
+            QT.record(end+1,1) = {baseFileName(1:8)};
+            QT.channelNum(end+1,1) = ch;
+            QT.RR_mean_method1(end+1,1) = table2array(QT_read(ch,1));
+            QT.RR_median_method1(end+1,1) = table2array(QT_read(ch,2));
+            QT.QTc1_median_method1(end+1,1) = table2array(QT_read(ch,3));
+            QT.QTc1_mean_method1(end+1,1) = table2array(QT_read(ch,4));
+            QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(ch,5));
+            QT.RR_median_method2(end+1,1) = table2array(QT_read(ch,6));
+            QT.RR_jQRS_method2(end+1,1)= table2array(QT_read(ch,7));
+            QT.QTc1_median_method2(end+1,1) = table2array(QT_read(ch,8));
+            QT.QTc1_median_method2_SQI(end+1,1) = table2array(QT_read(ch,9));
+            QT.QTc1_mean_method2_jQRS(end+1,1) = table2array (QT_read(ch, 10));
+            QT.QTc1_jQRS_method2_Gauss(end+1,1) = table2array(QT_read(ch, 11));
+            QT.QTc1_jQRS_method2_Gauss_SQI(end+1,1) = table2array(QT_read(ch,12));
+            QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(ch,13));
+
+        end
     end
 end
 disp(QT)
@@ -120,9 +142,17 @@ title('The Wavelet method distribution for Median QTlc IQR')
 %% Save results for the whole dataset in a CSV
 
 
-QT_table_colNames = {'subject','record', 'QTc1_median_IQR_Method_1',...
+QT_table_colNames = {'subject','record', 'channelNum', 'RR_mean_method_1',...
+    'RR_median_method_1', 'QTc1_median_method_1', 'QTc1_mean_method_1',...
+    'QTc1_median_median_IQR_method_1', 'RR_median_method_2', 'RR_jQRS_method_2',...
+    'QTc1_median_method_2', 'QTc1_median_SQI_method_2', 'QTc1_mean_jQRS_method_2',...
+    'QTc1_jQRS_method_2_Gauss', 'QTc1_jQRS_method_2_Gauss_SQI', ...
     'QTc1_median_IQR_Method_2'};
-QT_table = table(QT.subject, QT.record, QT.QTc1_median_IQR_Method_1, ...
+QT_table = table(QT.subject, QT.record, QT.channelNum, QT.RR_mean_method1,...
+    QT.RR_median_method1, QT.QTc1_median_method1, QT.QTc1_mean_method1,...
+    QT.QTc1_median_IQR_Method_1, QT.RR_median_method2, QT.RR_jQRS_method2,...
+    QT.QTc1_median_method2, QT.QTc1_median_method2_SQI, QT.QTc1_mean_method2_jQRS,...
+    QT.QTc1_jQRS_method2_Gauss, QT.QTc1_jQRS_method2_Gauss_SQI,...
     QT.QTc1_median_IQR_Method_2, 'VariableNames',QT_table_colNames);
 
 
