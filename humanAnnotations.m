@@ -3,7 +3,7 @@ function [humanQT] = humanAnnotations(inPath,annotationFileExtention, fName, fig
 %   Detailed explanation goes here
 
 % Inititalize variables
-humanQT.ann={}; humanQT.Tend={}; humanQT.Qstart={}; humanQT.QT={};
+humanQT.ann={}; humanQT.Tend={}; humanQT.Qstart={}; humanQT.QT=[];
 humanQT.RR_mean={}; humanQT.RR_median={}; humanQT.QTc1_median={};
 humanQT.QTc1_mean={}; humanQT.QTc1_median_IQR={};
 
@@ -11,22 +11,25 @@ humanQT.QTc1_mean={}; humanQT.QTc1_median_IQR={};
 [humanQT.ann{1}, humanQT.ann{2},~,~,humanQT.ann{3}]=rdann(inPath,annotationFileExtention);
 
 % Finding Tend and Qstart
-humanQT.Tend = humanQT.ann{1}(humanQT.ann{3}==2);
+humanQT.Tend = humanQT.ann{1}([humanQT.ann{2}==')' & humanQT.ann{3}==2]);
 humanQT.Qstart= humanQT.ann{1}([humanQT.ann{2}=='(' & humanQT.ann{3}==1]);
-[dim,~] = size(humanQT.Qstart);
-humanQT.QT = (humanQT.Tend(1:dim,1) - humanQT.Qstart)/fs;
-
+[dimQ,~] = size(humanQT.Qstart);
+for q=1:dimQ
+    humanQT.QT(q,1) = (humanQT.Tend(q) - humanQT.Qstart(q))/fs;
+end
 % Finding RR interval
 humanQT.R=humanQT.ann{1}([humanQT.ann{2}=='N' & humanQT.ann{3}==1]);
-[dim, ~] = size(humanQT.R);
-for r=1:(dim-1)
-    humanQT.RR(r) = (humanQT.R(r+1)-humanQT.R(r))/fs;
+[dimQT, ~] = size(humanQT.R);
+for r=1:(dimQT-1)
+    humanQT.RR(r,1) = (humanQT.R(r+1)-humanQT.R(r))/fs;
 end
 % median RR
 humanQT.RR_median = nanmedian(humanQT.RR);
 
 % ToDo: corrected QT, mean, median of RR and QTc1, and IQR
 % Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
+humanQT.QTc1  = humanQT.QT + 0.154*(1-humanQT.RR_median);
+humanQT.QTc1_median = median(humanQT.QTc1_median);
 
 % making a table for human QT
 HumanQT_colNames = {'QT'};
