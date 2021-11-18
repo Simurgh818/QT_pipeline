@@ -55,7 +55,7 @@ QT.QTc1_median_IQR_Method_2=[];
 % QT = cell(rows);
 
 for fn=1:numPatients
-    recordNames = dir(fullfile(results_path, folderNames(fn,:).name,'*.csv'));
+    recordNames = dir(fullfile(results_path, folderNames(fn,:).name,'*QT_results.csv'));
     [numRecords, ~] = size(recordNames);
     
    

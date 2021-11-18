@@ -54,7 +54,10 @@ results_path = 'C:\Users\sinad\OneDrive - Georgia Institute of Technology\Cliffo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ToDo: Need to generalize a way to list patient/subject subfolders for the
-% case there is subfolder and the case there is no subfolders
+% case there is subfolder and the case there is no subfolders: use try and
+% catch
+
+
 
 % folderNames = ls(fullfile(dbPath));
 dirNames = dir(fullfile(dbPath));
@@ -69,7 +72,7 @@ for fn=1:numPatients
     recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
     [numRecords, ~] = size(recordNames);
-    for rn=1:1
+    for rn=1:numRecords
         fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
         [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
         pathSplit = split(dbPath, '\');
@@ -88,9 +91,8 @@ for fn=1:numPatients
 %       Method_2: Li    
         [Method_2, Method_1] = QT_measurements(outPath, fName, figPath, nChannels, fs);
 %         Reading human annotations
-%         hPath = 'C:/Users/sinad/wfdb/10.6.2/database/qtdb/physionet.org/files/qtdb/1.0.0/sel100.qt1';
-%         fileID = fopen(hPath);
-%         A = fread(fileID);
+        [humanQT] = humanAnnotations(inPath,'q1c', fName, figPath, fs);
+
 
     end
 end
@@ -102,6 +104,6 @@ end
 % 
 % end
 
-QT = whole_dataset_stats(results_path);
+QT = whole_dataset_stats(results_path,nChannels);
 
 
