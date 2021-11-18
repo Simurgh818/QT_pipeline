@@ -118,6 +118,9 @@ end
 % else
 %     disp('There is a difference by chi-squared method')
 % end
+% Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
+% annotation
+% fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
 
 %% plot
 

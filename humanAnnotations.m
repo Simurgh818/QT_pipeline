@@ -13,9 +13,20 @@ humanQT.QTc1_mean={}; humanQT.QTc1_median_IQR={};
 % Finding Tend and Qstart
 humanQT.Tend = humanQT.ann{1}(humanQT.ann{3}==2);
 humanQT.Qstart= humanQT.ann{1}([humanQT.ann{2}=='(' & humanQT.ann{3}==1]);
-humanQT.QT = (humanQT.Tend - humanQT.Qstart)/fs;
+[dim,~] = size(humanQT.Qstart);
+humanQT.QT = (humanQT.Tend(1:dim,1) - humanQT.Qstart)/fs;
+
+% Finding RR interval
+humanQT.R=humanQT.ann{1}([humanQT.ann{2}=='N' & humanQT.ann{3}==1]);
+[dim, ~] = size(humanQT.R);
+for r=1:(dim-1)
+    humanQT.RR(r) = (humanQT.R(r+1)-humanQT.R(r))/fs;
+end
+% median RR
+humanQT.RR_median = nanmedian(humanQT.RR);
 
 % ToDo: corrected QT, mean, median of RR and QTc1, and IQR
+% Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
 
 % making a table for human QT
 HumanQT_colNames = {'QT'};
