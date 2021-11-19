@@ -203,7 +203,7 @@ end
 %     figName = fullfile(figPath, fileName);
 %     saveas(gcf, figName);
 % end
-% close all;
+close all;
 %% save results as a csv
 
 % colName = 'channelNum';

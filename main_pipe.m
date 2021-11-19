@@ -72,7 +72,7 @@ for fn=1:numPatients
     recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
     [numRecords, ~] = size(recordNames);
-    for rn=31:31
+    for rn=1:numRecords
         fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
         [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
         pathSplit = split(dbPath, '\');
@@ -91,7 +91,7 @@ for fn=1:numPatients
 %       Method_2: Li    
         [Method_2, Method_1] = QT_measurements(outPath, fName, figPath, nChannels, fs);
 %         Reading human annotations
-        [humanQT] = humanAnnotations(inPath,'q1c', fName, figPath, fs);
+        [humanQT] = humanAnnotations(inPath,'q1c', fName, figPath, fs, nChannels);
 
 
     end
@@ -104,6 +104,6 @@ end
 % 
 % end
 
-% QT = whole_dataset_stats(results_path,nChannels);
+QT = whole_dataset_stats(results_path,nChannels);
 
 
