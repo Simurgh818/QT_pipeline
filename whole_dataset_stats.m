@@ -109,6 +109,12 @@ end
 disp(QT)
 %% Stat measurements
 
+% Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
+% annotation
+% fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
+fit_nrmse_method_1 = goodnessOfFit(QT.QTc1_median_IQR_Method_1,QT.QTc1_median_human,'NRMSE');
+fit_nrmse_method_2 = goodnessOfFit(QT.QTc1_median_IQR_Method_2,QT.QTc1_median_human,'NRMSE');
+
 % Chi-squared Test
 
 % chi-squared probability density function distribution
@@ -135,9 +141,7 @@ end
 % else
 %     disp('There is a difference by chi-squared method')
 % end
-% Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
-% annotation
-% fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
+
 
 %% plot
 
@@ -157,6 +161,12 @@ x3 = size(QT.QTc1_median_human);
 scatter(1:x3, QT.QTc1_median_human, 'g', 'filled');
 ylabel('Second')
 title('The manual humman annotations for Median QTlc')
+
+figure(4)
+boxplot([QT.QTc1_median_human , QT.QTc1_median_IQR_Method_1, QT.QTc1_median_IQR_Method_2],...
+    'Labels',{'Median QTlc Human', 'Median QTlc Gaussian', 'Median QTlc Wavelet'});
+ylabel('time (seconds)');
+title('QT database Median QTlc')
 
 % figure(3)
 % plot(x,y);
@@ -181,7 +191,7 @@ QT_table = table(QT.subject, QT.record, QT.channelNum, QT.RR_mean_method1,...
     QT.QTc1_median_human, QT.QTc1_mean_human, 'VariableNames',QT_table_colNames);
 
 
-csv_fileName = 'QT_stats.csv';
+csv_fileName = 'QT_wholedataset_results.csv';
 fileName = fullfile(results_path, csv_fileName);
 writetable(QT_table, fileName);
 end
