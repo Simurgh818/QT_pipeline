@@ -17,17 +17,18 @@ humanQT.Qstart= humanQT.ann{1}([humanQT.ann{2}=='(' & humanQT.ann{3}==1]);
 if isempty(humanQT.Tend) || isempty(humanQT.Qstart)
     humanQT.QT = NaN;
 else
-
     for q=1:dimQ
         humanQT.QT(q,1) = (humanQT.Tend(q) - humanQT.Qstart(q))/fs;
     end
 end
+
 % Finding RR interval
-humanQT.R=humanQT.ann{1}([humanQT.ann{2}=='N' & humanQT.ann{3}==1]);
+humanQT.R=humanQT.ann{1}([humanQT.ann{2}=='N']);
 [dimQT, ~] = size(humanQT.R);
 for r=1:(dimQT-1)
     humanQT.RR(r,1) = (humanQT.R(r+1)-humanQT.R(r))/fs;
 end
+
 % median RR
 humanQT.RR_median = median(humanQT.RR);
 humanQT.RR_mean = mean(humanQT.RR);

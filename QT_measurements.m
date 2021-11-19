@@ -158,26 +158,26 @@ Method_1.QTc1_mean(Method_1.QTc1_mean>1 | Method_1.QTc1_mean<0.1)=NaN;
 md_QT_Method_1(md_QT_Method_1>1 | md_QT_Method_1<0.1) = NaN;
 %% Plotting Dr. Method_2 vs. Mr. Method_1 QT measurments
 
-x = 1:nChannels;
-figure(1)
-hold on
-scatter(x, md_QT_Qiao, 'b', 'filled');
-scatter(x, md_QT_Method_1, 'r', 'filled');
-legend('wavelet','Gaussian Model');
-title('Median QT');
-xlabel('leads');
-ylabel('time (s)');
-hold off
-if ~exist(figPath, 'dir')
-    mkdir(figPath)
-end
-
-figExt = ['.fig';'.eps'; '.png'];
-for fx=1:3
-    fileName = [fName , figExt(fx,:)];
-    figName = fullfile(figPath, fileName);
-    saveas(gcf, figName);
-end
+% x = 1:nChannels;
+% figure(1)
+% hold on
+% scatter(x, md_QT_Qiao, 'b', 'filled');
+% scatter(x, md_QT_Method_1, 'r', 'filled');
+% legend('wavelet','Gaussian Model');
+% title('Median QT');
+% xlabel('leads');
+% ylabel('time (s)');
+% hold off
+% if ~exist(figPath, 'dir')
+%     mkdir(figPath)
+% end
+% 
+% figExt = ['.fig';'.eps'; '.png'];
+% for fx=1:3
+%     fileName = [fName , figExt(fx,:)];
+%     figName = fullfile(figPath, fileName);
+%     saveas(gcf, figName);
+% end
 %% Troubleshooting outliers
 
 % 
