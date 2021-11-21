@@ -51,7 +51,8 @@ QT.RR_median_method2=[]; QT.RR_jQRS_method2=[];
 QT.QTc1_median_method2=[]; QT.QTc1_median_method2_SQI=[]; QT.QTc1_mean_method2_jQRS=[];
 QT.QTc1_jQRS_method2_Gauss=[]; QT.QTc1_jQRS_method2_Gauss_SQI=[];
 QT.QTc1_median_IQR_Method_2=[]; QT.RR_median_human=[]; QT.RR_mean_human=[];
-QT.QTc1_median_human=[]; QT.QTc1_mean_human=[];
+QT.QTc1_median_human=[]; QT.QTc1_mean_human=[]; QT.RMSE_method_1=[]; 
+QT.RMSE_method_2=[]; 
 % rows = numPatients;
 % QT = cell(rows);
 
@@ -112,8 +113,8 @@ disp(QT)
 % Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
 % annotation
 % fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
-fit_nrmse_method_1 = goodnessOfFit(QT.QTc1_median_IQR_Method_1,QT.QTc1_median_human,'NRMSE');
-fit_nrmse_method_2 = goodnessOfFit(QT.QTc1_median_IQR_Method_2,QT.QTc1_median_human,'NRMSE');
+QT.RMSE_method_1 = sqrt(nanmean((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_human).^2));
+QT.RMSE_method_2 = sqrt(nanmean((QT.QTc1_median_IQR_Method_2-QT.QTc1_median_human).^2));
 
 % Chi-squared Test
 
@@ -162,11 +163,27 @@ scatter(1:x3, QT.QTc1_median_human, 'g', 'filled');
 ylabel('Second')
 title('The manual humman annotations for Median QTlc')
 
+% Plot channel 1 and 2 separately
+% channel 1
+QTc1_median_method_1_ch1=QT.QTc1_median_method1(QT.channelNum==1);
+QTc1_median_method_2_ch1=QT.QTc1_median_method2(QT.channelNum==1);
+QTc1_median_human_ch1= QT.QTc1_median_human(QT.channelNum==1);
 figure(4)
-boxplot([QT.QTc1_median_human , QT.QTc1_median_IQR_Method_1, QT.QTc1_median_IQR_Method_2],...
+boxplot([QTc1_median_human_ch1 , QTc1_median_method_1_ch1, QTc1_median_method_2_ch1],...
     'Labels',{'Median QTlc Human', 'Median QTlc Gaussian', 'Median QTlc Wavelet'});
 ylabel('time (seconds)');
-title('QT database Median QTlc')
+title('QT database Median QTlc for Lead 1')
+
+% channel 2
+QTc1_median_method_1_ch2=QT.QTc1_median_method1(QT.channelNum==2);
+QTc1_median_method_2_ch2=QT.QTc1_median_method2(QT.channelNum==2);
+QTc1_median_human_ch2= QT.QTc1_median_human(QT.channelNum==2);
+figure(5)
+boxplot([QTc1_median_human_ch2 , QTc1_median_method_1_ch2, QTc1_median_method_2_ch2],...
+    'Labels',{'Median QTlc Human', 'Median QTlc Gaussian', 'Median QTlc Wavelet'});
+ylabel('time (seconds)');
+title('QT database Median QTlc for Lead 2')
+
 
 % figure(3)
 % plot(x,y);
