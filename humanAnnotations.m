@@ -33,7 +33,6 @@ end
 humanQT.RR_median = median(humanQT.RR);
 humanQT.RR_mean = mean(humanQT.RR);
 
-% ToDo: corrected QT, mean, median of RR and QTc1, and IQR
 % Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
 humanQT.QTc1  = humanQT.QT + 0.154*(1-humanQT.RR_median);
 humanQT.QTc1_median = median(humanQT.QTc1);
@@ -46,8 +45,11 @@ for ch=1:nChannels
     humanQT.QTc1_median(ch,1) = humanQT.QTc1_median;
     humanQT.QTc1_mean(ch,1) = humanQT.QTc1_mean;
 end
+%% Quality Control
+humanQT.QTc1_median(humanQT.QTc1_median>0.5 | humanQT.QTc1_median<0.3)=NaN;
+humanQT.QTc1_mean(humanQT.QTc1_mean>0.5 | humanQT.QTc1_mean<0.3)=NaN;
 
-% making a table for human QT
+%% making a table for human QT
 channelNum = [1:nChannels]';
 HumanQT_colNames = {'channelNum', 'RR_median_human', 'RR_mean_human', 'QTc1_median_human',...
     'QTc1_mean_human'};

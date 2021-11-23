@@ -72,7 +72,7 @@ for fn=1:numPatients
     recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
     [numRecords, ~] = size(recordNames);
-    for rn=57:57
+    for rn=68:68
         fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
         [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
         pathSplit = split(dbPath, '\');

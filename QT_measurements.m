@@ -122,8 +122,8 @@ waveParams = [];
 
 for ch=1:nChannels
     [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs );
-%     Quality Control check to exclude QT <0.3 and >1 second
-    qc_indecies = 0.3<qtInt & qtInt<1;
+%     Quality Control check to exclude QT <0.3 and >0.5 second
+    qc_indecies = 0.3<qtInt & qtInt<0.5;
     qtInt = qtInt(qc_indecies);
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
@@ -152,10 +152,19 @@ md_QT_Method_1 = Method_1.QTc1_median;
 % NaN.
 %% Quality Control
 
-Method_1.QTc1_median(Method_1.QTc1_median>1 | Method_1.QTc1_median<0.3)=NaN;
-Method_1.QTc1_mean(Method_1.QTc1_mean>1 | Method_1.QTc1_mean<0.3)=NaN;
+Method_1.QTc1_median(Method_1.QTc1_median>0.5 | Method_1.QTc1_median<0.3)=NaN;
+Method_1.QTc1_mean(Method_1.QTc1_mean>0.5 | Method_1.QTc1_mean<0.3)=NaN;
+Method_1.QTc1_median_IQR(Method_1.QTc1_median_IQR>0.5 | Method_1.QTc1_median_IQR<0.3)=NaN;
 
-md_QT_Method_1(md_QT_Method_1>1 | md_QT_Method_1<0.3) = NaN;
+md_QT_Method_1(md_QT_Method_1>0.5 | md_QT_Method_1<0.3) = NaN;
+
+Method_2.QTc1_median_wavelet(Method_2.QTc1_median_wavelet>0.5 | Method_2.QTc1_median_wavelet<0.3)=NaN;
+Method_2.QTc1_median_wavelet_SQI(Method_2.QTc1_median_wavelet_SQI >0.5 | Method_2.QTc1_median_wavelet_SQI<0.3)=NaN;
+Method_2.QTc1_median_IQR(Method_2.QTc1_median_IQR >0.5 | Method_2.QTc1_median_IQR<0.3)=NaN;
+Method_2.QTc1_mean_jQRS(Method_2.QTc1_mean_jQRS >0.5 | Method_2.QTc1_mean_jQRS<0.3)=NaN;
+Method_2.GaussQTlc_jQRS(Method_2.GaussQTlc_jQRS >0.5 | Method_2.GaussQTlc_jQRS<0.3)=NaN;
+Method_2.GaussQTlc_SQI(Method_2.GaussQTlc_SQI >0.5 | Method_2.GaussQTlc_SQI<0.3)=NaN;
+
 %% Plotting Dr. Method_2 vs. Mr. Method_1 QT measurments
 
 % x = 1:nChannels;
