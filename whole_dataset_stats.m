@@ -128,10 +128,12 @@ y = chi2pdf(x,1);
 % Normal distribution check: 
 [h, p] = chi2gof(QT.QTc1_median_IQR_Method_1,'Alpha',0.05);
 [h2, p2] = chi2gof(QT.QTc1_median_IQR_Method_2, 'Alpha',0.05);
-if h==1 && h2==1
+[h3, p3] = chi2gof(QT.QTc1_median_human, 'Alpha',0.05);
+
+if h==1 && h2==1 && h3==1
     disp('Chi-squared test: reject null hypothesis, not a normal distribution');
-    fprintf('The Gaussian p-value is %1.3g, and the Wavelet p-value is %1.3g.\n',...
-        p, p2);
+    fprintf('The p-values for the human is %1.3g , Gaussian is %1.3g and the Wavelet is %1.3g .\n',...
+        p3, p, p2);
 else
     disp('Chi-squared test: null hypotheiss not reject, a normal distribution.');
 end
