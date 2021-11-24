@@ -115,7 +115,7 @@ disp(QT)
 % fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
 QT.RMSE_method_1 = sqrt(nanmean((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_human).^2));
 QT.RMSE_method_2 = sqrt(nanmean((QT.QTc1_median_IQR_Method_2-QT.QTc1_median_human).^2));
-fprintf('The RMSE between human QT and Method 1 is %d, and for Method 2 is %d.\n',...
+fprintf('The RMSE between human QT and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
         QT.RMSE_method_1, QT.RMSE_method_2);
 
 % Chi-squared Test
@@ -129,11 +129,11 @@ y = chi2pdf(x,1);
 [h, p] = chi2gof(QT.QTc1_median_IQR_Method_1,'Alpha',0.05);
 [h2, p2] = chi2gof(QT.QTc1_median_IQR_Method_2, 'Alpha',0.05);
 if h==1 && h2==1
-    disp('reject null hypothesis, not a normal distribution');
-    fprintf('The Gaussian p-value is %d, and the Wavelet p-value is %d.\n',...
+    disp('Chi-squared test: reject null hypothesis, not a normal distribution');
+    fprintf('The Gaussian p-value is %1.3g, and the Wavelet p-value is %1.3g.\n',...
         p, p2);
 else
-    disp('null hypotheiss not reject, a normal distribution.');
+    disp('Chi-squared test: null hypotheiss not reject, a normal distribution.');
 end
 
 % chi-squared test:
@@ -151,18 +151,21 @@ end
 figure(1)
 scatter(x, QT.QTc1_median_IQR_Method_1, 'r', 'filled');
 ylabel('Second')
+xlabel('Record #')
 title('The Gaussian Model distribution for Median QTlc IQR')
 
 figure(2)
 x2 = size(QT.QTc1_median_IQR_Method_2);
 scatter(1:x2, QT.QTc1_median_IQR_Method_2, 'b', 'filled');
 ylabel('Second')
+xlabel('Record #')
 title('The Wavelet method distribution for Median QTlc IQR')
 
 figure(3)
 x3 = size(QT.QTc1_median_human);
 scatter(1:x3, QT.QTc1_median_human, 'g', 'filled');
 ylabel('Second')
+xlabel('Record #')
 title('The manual humman annotations for Median QTlc')
 
 % Plot channel 1 and 2 separately
