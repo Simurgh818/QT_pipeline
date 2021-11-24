@@ -82,8 +82,12 @@ end
 fs2 = 1000;
 Method_2.QT_mean_jQRS = QT(:,1)/fs2;
 Method_2.QT_median_wavelet = QT(:,2)/fs2;
-Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2;
-Method_2.GaussQT_jQRS = QT(:,4)/fs2;
+Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2; % SQI stands for signal quality >0.9
+% The GaussQT uses a gaussian fit for T wave offset. The jQRS stands for Joachim Behar QRS detector.
+% based on Behar Joachim, Jonhson Alistair, Clifford Gari D., Oster Julien A
+% Comparison of Single Channel Foetal ECG Extraction Methods. 
+% Annals of Biomedical Engineering. 42(6), 1340-53. 2014
+Method_2.GaussQT_jQRS = QT(:,4)/fs2; 
 Method_2.GaussQT_SQI = QT(:,5)/fs2;
 
 

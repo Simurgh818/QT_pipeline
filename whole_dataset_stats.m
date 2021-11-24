@@ -115,6 +115,8 @@ disp(QT)
 % fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
 QT.RMSE_method_1 = sqrt(nanmean((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_human).^2));
 QT.RMSE_method_2 = sqrt(nanmean((QT.QTc1_median_IQR_Method_2-QT.QTc1_median_human).^2));
+fprintf('The RMSE between human QT and Method 1 is %d, and for Method 2 is %d.\n',...
+        QT.RMSE_method_1, QT.RMSE_method_2);
 
 % Chi-squared Test
 
