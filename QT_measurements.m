@@ -144,9 +144,12 @@ Method_1_indecies = Method_1_iqr_lower<Method_1.QT_median & Method_1.QT_median<M
 Method_1.QT_median_IQR(1:nChannels, 1) = median(Method_1.QT_median(Method_1_indecies)); % median QT across the interquartile range
 
 % Correcting QT based on Sagie's Linear regression method: QTlc = QT + 0.154(1-RR) 
+% Please note the Wavlet's QRS detector is used for QT correctiohn, the
+% Method_2.RR_median_wavelet, instead of the Gaussian's R peak detector,
+% which is based on max peak amplitude. 
 Method_1.QTc1_mean = Method_1.QT_mean + 0.154*(1-Method_1.RR_mean);
-Method_1.QTc1_median = Method_1.QT_median + 0.154*(1-Method_1.RR_median);
-Method_1.QTc1_median_IQR = Method_1.QT_median_IQR + 0.154*(1-Method_1.RR_median);
+Method_1.QTc1_median = Method_1.QT_median + 0.154*(1-Method_2.RR_median_wavelet);
+Method_1.QTc1_median_IQR = Method_1.QT_median_IQR + 0.154*(1-Method_2.RR_median_wavelet);
 
 
 md_QT_Method_1 = Method_1.QTc1_median;
@@ -222,11 +225,12 @@ close all;
 % colName = 'channelNum';
 Method_2_colNames = {'channelNum', 'QTc1_median_wavelet', 'QTc1_median_wavelet_SQI',...
     'GaussQTlc_SQI', 'QTc1_median_IQR', 'QTc1_mean_jQRS','GaussQTlc_jQRS',...
-    'RR_jQRS', 'RR_median_wavelet'};
+    'RR_jQRS', 'RR_median_wavelet', 'RR_mean_wavelet'};
 channelNum = [1:nChannels]';
 Method_2_table = table(channelNum, Method_2.QTc1_median_wavelet, Method_2.QTc1_median_wavelet_SQI,...
     Method_2.GaussQTlc_SQI, Method_2.QTc1_median_IQR, Method_2.QTc1_mean_jQRS,... 
-    Method_2.GaussQTlc_jQRS, Method_2.RR_jQRS, Method_2.RR_median_wavelet,'VariableNames',Method_2_colNames);
+    Method_2.GaussQTlc_jQRS, Method_2.RR_jQRS, Method_2.RR_median_wavelet,...
+    Method_2.RR_mean_wavelet, 'VariableNames',Method_2_colNames);
 
 Method_1_colNames = {'channelNum', 'QTc1_median', 'QTc1_mean', 'QTc1_median_IQR',...
     'RR_median', 'RR_mean'};
