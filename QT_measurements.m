@@ -147,7 +147,7 @@ Method_1.QT_median_IQR(1:nChannels, 1) = median(Method_1.QT_median(Method_1_inde
 % Please note the Wavlet's QRS detector is used for QT correctiohn, the
 % Method_2.RR_median_wavelet, instead of the Gaussian's R peak detector,
 % which is based on max peak amplitude. 
-Method_1.QTc1_mean = Method_1.QT_mean + 0.154*(1-Method_1.RR_mean);
+Method_1.QTc1_mean = Method_1.QT_mean + 0.154*(1-Method_2.RR_mean_wavelet);
 Method_1.QTc1_median = Method_1.QT_median + 0.154*(1-Method_2.RR_median_wavelet);
 Method_1.QTc1_median_IQR = Method_1.QT_median_IQR + 0.154*(1-Method_2.RR_median_wavelet);
 

@@ -95,7 +95,7 @@ for fn=1:numPatients
             QT.RR_mean_method2(end+1,1) = table2array(QT_read(ch,7));
             QT.RR_jQRS_method2(end+1,1)= table2array(QT_read(ch,8));
 
-            QT.QTc1_median_method2(end+1,1) = table2array(QT_read(ch,8));
+            QT.QTc1_median_method2(end+1,1) = table2array(QT_read(ch,9));
             QT.QTc1_median_method2_SQI(end+1,1) = table2array(QT_read(ch,10));
             QT.QTc1_mean_method2_jQRS(end+1,1) = table2array (QT_read(ch, 11));
             QT.QTc1_jQRS_method2_Gauss(end+1,1) = table2array(QT_read(ch, 12));
