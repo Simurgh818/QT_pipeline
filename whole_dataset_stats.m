@@ -83,7 +83,8 @@ for fn=1:numPatients
         for ch=1:numChannels
     
             QT.subject(end+1,1) = {folderNames(fn,:).name};
-            QT.record(end+1,1) = {baseFileName(1:8)};
+            split_bfn = split(baseFileName,'_');
+            QT.record(end+1,1) = split_bfn(1,:);
             QT.channelNum(end+1,1) = ch;
             QT.RR_mean_method1(end+1,1) = table2array(QT_read(ch,1));
             QT.RR_median_method1(end+1,1) = table2array(QT_read(ch,2));
