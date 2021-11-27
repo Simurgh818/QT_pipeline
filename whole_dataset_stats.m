@@ -110,7 +110,6 @@ for fn=1:numPatients
         end
     end
 end
-disp(QT)
 %% Stat measurements
 
 % Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
@@ -134,10 +133,12 @@ QT.RMSE_method_1(1,1) = sqrt(nanmean((QTc1_median_method_1_ch1-QTc1_median_human
 QT.RMSE_method_2(1,1) = sqrt(nanmean((QTc1_median_method_2_ch1-QTc1_median_human_ch1).^2));
 QT.RMSE_method_1(2,1) = sqrt(nanmean((QTc1_median_method_1_ch2-QTc1_median_human_ch2).^2));
 QT.RMSE_method_2(2,1) = sqrt(nanmean((QTc1_median_method_2_ch2-QTc1_median_human_ch2).^2));
+disp(QT)
 fprintf('The RMSE between lead 1 human QTc1 and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
         QT.RMSE_method_1(1,1), QT.RMSE_method_2(1,1));
 fprintf('The RMSE between lead 2 human QTc1 and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
         QT.RMSE_method_1(2,1), QT.RMSE_method_2(2,1));
+
 % Chi-squared Test
 
 % chi-squared probability density function distribution
