@@ -116,11 +116,28 @@ disp(QT)
 % Normalized Root Mean Squared Error for Method 1 and 2 vs. Human
 % annotation
 % fit_nrmse = goodnessOfFit(yc,yrefc,'NRMSE')
-QT.RMSE_method_1 = sqrt(nanmean((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_human).^2));
-QT.RMSE_method_2 = sqrt(nanmean((QT.QTc1_median_IQR_Method_2-QT.QTc1_median_human).^2));
-fprintf('The RMSE between human QT and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
-        QT.RMSE_method_1, QT.RMSE_method_2);
+% QT.RMSE_method_1 = sqrt(nanmean((QT.QTc1_median_IQR_Method_1-QT.QTc1_median_human).^2));
+% QT.RMSE_method_2 = sqrt(nanmean((QT.QTc1_median_IQR_Method_2-QT.QTc1_median_human).^2));
+% fprintf('The RMSE between human QT and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
+%         QT.RMSE_method_1, QT.RMSE_method_2);
 
+% channel 1
+QTc1_median_method_1_ch1=QT.QTc1_median_method1(QT.channelNum==1);
+QTc1_median_method_2_ch1=QT.QTc1_median_method2(QT.channelNum==1);
+QTc1_median_human_ch1= QT.QTc1_median_human(QT.channelNum==1);
+% channel 2
+QTc1_median_method_1_ch2=QT.QTc1_median_method1(QT.channelNum==2);
+QTc1_median_method_2_ch2=QT.QTc1_median_method2(QT.channelNum==2);
+QTc1_median_human_ch2= QT.QTc1_median_human(QT.channelNum==2);
+
+QT.RMSE_method_1(1,1) = sqrt(nanmean((QTc1_median_method_1_ch1-QTc1_median_human_ch1).^2));
+QT.RMSE_method_2(1,1) = sqrt(nanmean((QTc1_median_method_2_ch1-QTc1_median_human_ch1).^2));
+QT.RMSE_method_1(2,1) = sqrt(nanmean((QTc1_median_method_1_ch2-QTc1_median_human_ch2).^2));
+QT.RMSE_method_2(2,1) = sqrt(nanmean((QTc1_median_method_2_ch2-QTc1_median_human_ch2).^2));
+fprintf('The RMSE between lead 1 human QTc1 and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
+        QT.RMSE_method_1(1,1), QT.RMSE_method_2(1,1));
+fprintf('The RMSE between lead 2 human QTc1 and Method 1 is %1.3g, and for Method 2 is %1.3g.\n',...
+        QT.RMSE_method_1(2,1), QT.RMSE_method_2(2,1));
 % Chi-squared Test
 
 % chi-squared probability density function distribution
@@ -174,20 +191,13 @@ xlabel('Record #')
 title('The manual humman annotations for Median QTlc')
 
 % Plot channel 1 and 2 separately
-% channel 1
-QTc1_median_method_1_ch1=QT.QTc1_median_method1(QT.channelNum==1);
-QTc1_median_method_2_ch1=QT.QTc1_median_method2(QT.channelNum==1);
-QTc1_median_human_ch1= QT.QTc1_median_human(QT.channelNum==1);
+
 figure(4)
 boxplot([QTc1_median_human_ch1 , QTc1_median_method_1_ch1, QTc1_median_method_2_ch1],...
     'Labels',{'Median QTlc Human', 'Median QTlc Gaussian', 'Median QTlc Wavelet'});
 ylabel('time (seconds)');
 title('QT database Median QTlc for Lead 1')
 
-% channel 2
-QTc1_median_method_1_ch2=QT.QTc1_median_method1(QT.channelNum==2);
-QTc1_median_method_2_ch2=QT.QTc1_median_method2(QT.channelNum==2);
-QTc1_median_human_ch2= QT.QTc1_median_human(QT.channelNum==2);
 figure(5)
 boxplot([QTc1_median_human_ch2 , QTc1_median_method_1_ch2, QTc1_median_method_2_ch2],...
     'Labels',{'Median QTlc Human', 'Median QTlc Gaussian', 'Median QTlc Wavelet'});
