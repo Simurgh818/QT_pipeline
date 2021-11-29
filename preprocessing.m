@@ -100,5 +100,5 @@ y = filter(b, a, x);
 % cancellation
 %% CSV write
 
-csvwrite(outPath, data_base_cor');
+csvwrite(outPath, y');
 end 
