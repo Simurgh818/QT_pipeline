@@ -31,6 +31,11 @@ data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
+Method_1.QT_mean=[]; Method_1.QT_median = []; 
+Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
+Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
+Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % QTc2 is correction by Bazett's formula
+
 Method_2.QR_mean=[]; Method_2.QR_median=[];
 Method_2.RT_mean=[]; Method_2.RT_median=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
@@ -40,10 +45,6 @@ Method_2.RR_jQRS=[]; Method_2.RR_median_wavelet=[]; Method_2.RR_mean_wavelet=[];
 Method_2.QT_median_IQR=[]; Method_2.QTc1_mean_jQRS=[]; Method_2.QTc1_median_wavelet=[];
 Method_2.QTc1_median_wavelet_SQI=[]; Method_2.GaussQTlc_jQRS=[]; 
 Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
-
-Method_1.QT_mean=[]; Method_1.QT_median = []; 
-Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
-Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
 % Calculating the Q start and T end of the wavelet method
@@ -188,7 +189,7 @@ Method_2.GaussQTlc_SQI(Method_2.GaussQTlc_SQI >0.5 | Method_2.GaussQTlc_SQI<0.3)
 %     mkdir(figPath)
 % end
 % 
-% figExt = ['.fig';'.eps'; '.png'];
+figExt = ['.fig';'.eps'; '.png'];
 % for fx=1:3
 %     fileName = [fName , figExt(fx,:)];
 %     figName = fullfile(figPath, fileName);
@@ -197,29 +198,29 @@ Method_2.GaussQTlc_SQI(Method_2.GaussQTlc_SQI >0.5 | Method_2.GaussQTlc_SQI<0.3)
 %% Troubleshooting outliers
 
 % 
-% [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 9), fs);
-% [L, ~] = size(data_base_cor_csv); %length of the signal
-% 
-% Q_start = round(rPeaks+waveParams.q(1,:)*fs);
-% T_end = round(rPeaks+waveParams.t(2,:)*fs);
-% Q_start = Q_start(Q_start>0);
-% T_end = T_end(~isnan(T_end));
-% figure(2)
-% hold on
-% plot(1:L, -data_base_cor_csv(:,9), 'b-');
-% title('Lead 9');
-% plot(Q_start, -data_base_cor_csv(Q_start,9), 'g*');
-% plot(T_end, -data_base_cor_csv(T_end,9), 'r*');
-% legend('Lead 9','Q start', 'T end');
-% xlabel('samples');
-% ylabel('mV');
-% hold off
-% for fx=1:3
-%     fileName = [fName , '_lead9', figExt(fx,:)];
-%     figName = fullfile(figPath, fileName);
-%     saveas(gcf, figName);
-% end
-close all;
+[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
+[L, ~] = size(data_base_cor_csv); %length of the signal
+
+Q_start = round(rPeaks+waveParams.q(1,:)*fs);
+T_end = round(rPeaks+waveParams.t(2,:)*fs);
+Q_start = Q_start(Q_start>0);
+T_end = T_end(~isnan(T_end));
+figure(2)
+hold on
+plot(1:L, data_base_cor_csv(:,1), 'b-');
+title('Lead 1');
+plot(Q_start, data_base_cor_csv(Q_start,1), 'g*');
+plot(T_end, data_base_cor_csv(T_end,1), 'r*');
+legend('Lead 1','Q start', 'T end');
+xlabel('samples');
+ylabel('mV');
+hold off
+for fx=1:3
+    fileName = [fName , '_lead1', figExt(fx,:)];
+    figName = fullfile(figPath, fileName);
+    saveas(gcf, figName);
+end
+% close all;
 %% save results as a csv
 
 % colName = 'channelNum';
