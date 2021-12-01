@@ -29,13 +29,15 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-QT = zeros(nChannels,5);
-RR = zeros(nChannels, 3);
+Method_1.Qon = []; Method_1.Toff=[];
 Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
 Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % QTc2 is correction by Bazett's formula
 
+QT = zeros(nChannels,5);
+RR = zeros(nChannels, 3);
+Method_2.Qon=[]; Method_2.Toff=[];
 Method_2.QR_mean=[]; Method_2.QR_median=[];
 Method_2.RT_mean=[]; Method_2.RT_median=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
@@ -48,8 +50,7 @@ Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
 % Calculating the Q start and T end of the wavelet method
-
-% QT by median QT of every beat
+beats = struct();
 heasig.nsig=1;
 
 heasig.spf = [1,1];
@@ -64,11 +65,11 @@ for ch=1:nChannels
     heasig.freq=1000;
     ecg=lp_filter_1000(ecg);
     heasig.nsamp=length(ecg);
-    beats(ch,:)=wavedet_3D(ecg,[],heasig);
-%   ToDo: assign Method_2.RT and QR per channel in the loop
-%   ToDO: need to subtract R time to get QR time interval
-    QR(ch,:)= beats(ch,:).QRSon;
-    RT(ch,:)= beats(ch,:).QRSon;
+    beats=wavedet_3D(ecg,[],heasig);
+    beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
+    beats.Toff = beats.Toff(~isnan(beats.Toff));
+    Method_2.Qon(ch,:)= beats.QRSon;
+    Method_2.Toff(ch,:)= beats.Toff;
 end
 
 % Calculating Q Start and T end
@@ -201,17 +202,24 @@ figExt = ['.fig';'.eps'; '.png'];
 [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
 [L, ~] = size(data_base_cor_csv); %length of the signal
 
-Q_start = round(rPeaks+waveParams.q(1,:)*fs);
-T_end = round(rPeaks+waveParams.t(2,:)*fs);
-Q_start = Q_start(Q_start>0);
-T_end = T_end(~isnan(T_end));
+Method_1.Qon = round((rPeaks-waveParams.q(1,:))*fs);
+Method_1.Toff = round((rPeaks+waveParams.t(1,:))*fs);
+Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
+Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
 figure(2)
 hold on
-plot(1:L, data_base_cor_csv(:,1), 'b-');
+plot(1:L, data_base_cor_csv(:,1), 'k-');
 title('Lead 1');
-plot(Q_start, data_base_cor_csv(Q_start,1), 'g*');
-plot(T_end, data_base_cor_csv(T_end,1), 'r*');
-legend('Lead 1','Q start', 'T end');
+plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'go');
+plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro');
+% Need to multiply by fs2 
+
+Method_2.Qon = round(Method_2.Qon*fs/fs2);
+Method_2.Toff = round(Method_2.Toff*fs/fs2);
+plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'g*');
+plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*');
+legend('Lead 1','Method 1 Q start', 'Method 1 T end', ...
+    'Method 2 Q start', 'Method 2 T end');
 xlabel('samples');
 ylabel('mV');
 hold off
