@@ -58,7 +58,7 @@ heasig.spf_ecg = 1;
 
 for ch=1:nChannels
     [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs );
-    
+%     output R peak from the base level and pass it up every level
 %     Calculating Q start and T end
     % resample to 1000Hz
     ecg=resample(data_base_cor_csv(:,ch),1000,fs);
@@ -199,28 +199,28 @@ figExt = ['.fig';'.eps'; '.png'];
 %% Troubleshooting outliers
 
 % 
-[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 2), fs);
+[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
 [L, ~] = size(data_base_cor_csv); %length of the signal
 
-Method_1.Qon = round(rPeaks-abs(waveParams.q(2,:)*fs));% waveParams.q have large negative values fpr recprd se;16272
-Method_1.Toff = round(rPeaks+(waveParams.t(2,:)*fs));
+Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:)*fs));% waveParams.q have large negative values fpr recprd se;16272
+Method_1.Toff = round(rPeaks+(waveParams.t(1,:)*fs));
 Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
 Method_1.Qon(Method_1.Qon<0)=0;
 Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
 Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
 figure(2)
 hold on
-plot(1:L, data_base_cor_csv(:,2), 'k-');
-title('Lead 2');
-plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', LineWidth=3);
-plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', LineWidth=3);
+plot(1:L, data_base_cor_csv(:,1), 'k-');
+title('Lead 1');
+plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
+plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', 'LineWidth', 3);
 % Need to multiply by fs2 
 
-Method_2.Qon = round(Method_2.Qon(2,:)*fs/fs2);
-Method_2.Toff = round(Method_2.Toff(2,:)*fs/fs2);
-plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', LineWidth=3);
-plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', LineWidth=3);
-legend('Lead 2','Method 1 Q start', 'Method 1 T end', ...
+Method_2.Qon = round(Method_2.Qon(1,:)*fs/fs2);
+Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2);
+plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
+plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
+legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
     'Method 2 Q start', 'Method 2 T end');
 xlabel('samples');
 ylabel('mV');
