@@ -27,6 +27,8 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialize variables
 
+Troubleshooting = 1; % Troubleshooting flag to plot every step
+
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
 Method_1.Qon = []; Method_1.Toff=[];
@@ -37,7 +39,7 @@ Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % Q
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
-Method_2.Qon=[]; Method_2.Toff=[];
+Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak=[];
 Method_2.QR_mean=[]; Method_2.QR_median=[];
 Method_2.RT_mean=[]; Method_2.RT_median=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
@@ -57,7 +59,7 @@ heasig.spf = [1,1];
 heasig.spf_ecg = 1;
 
 for ch=1:nChannels
-    [QT(ch,:), RR(ch,:)] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs );
+    [QT(ch,:), RR(ch,:), beats] = QT_analysis_single_lead(data_base_cor_csv(:,ch),fs );
 %     output R peak from the base level and pass it up every level
 %     Calculating Q start and T end
     % resample to 1000Hz
@@ -65,7 +67,7 @@ for ch=1:nChannels
     heasig.freq=1000;
     ecg=lp_filter_1000(ecg);
     heasig.nsamp=length(ecg);
-    beats=wavedet_3D(ecg,[],heasig);
+%     beats=wavedet_3D(ecg,[],heasig);
     beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
     beats.Toff = beats.Toff(~isnan(beats.Toff));
     Method_2.Qon(ch,:)= beats.QRSon;
@@ -208,28 +210,12 @@ Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
 Method_1.Qon(Method_1.Qon<0)=0;
 Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
 Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
-figure(2)
-hold on
-plot(1:L, data_base_cor_csv(:,1), 'k-');
-title('Lead 1');
-plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
-plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', 'LineWidth', 3);
-% Need to multiply by fs2 
 
+Method_2.Rpeak = floor(beats.R(~isnan(beats.R))*fs/fs2); 
 Method_2.Qon = round(Method_2.Qon(1,:)*fs/fs2);
 Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2);
-plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
-plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
-legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
-    'Method 2 Q start', 'Method 2 T end');
-xlabel('samples');
-ylabel('mV');
-hold off
-for fx=1:3
-    fileName = [fName , '_lead2', figExt(fx,:)];
-    figName = fullfile(figPath, fileName);
-    saveas(gcf, figName);
-end
+
+
 % close all;
 %% save results as a csv
 
@@ -254,6 +240,39 @@ joined_tables = join(Method_1_table, Method_2_table, 'keys', 'channelNum');
 
 csv_fileName = [fName, '_QT_results.csv'];
 fileName = fullfile(figPath, csv_fileName);
-writetable(joined_tables, fileName);
+    writetable(joined_tables, fileName);
+
+
+
+% Need to multiply by fs2 
+% plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
+% plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
+% legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
+%     'Method 2 Q start', 'Method 2 T end');
+% xlabel('samples');
+% ylabel('mV');
+% hold off
+
+if Troubleshooting
+    figure(3)
+    hold on
+    plot(1:L, data_base_cor_csv(:,1), 'k-')
+    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+')
+    xlabel('samples')
+    ylabel('mV')
+    title("R peak detection step in lead 1")
+    legend('preprocessed ', 'Method 2 R peaks')
+    hold off
+
+%     figure(4)
+%     plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
+%     plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', 'LineWidth', 3);
+
+end
+for fx=1:3
+    fileName = [fName , '_lead1', figExt(fx,:)];
+    figName = fullfile(figPath, fileName);
+    saveas(gcf, figName);
+end
 
 end

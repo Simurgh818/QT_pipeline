@@ -32,6 +32,7 @@ function [fs] = preprocessing(inPath, outPath, nChannels)
 
 close all;
 
+Troubleshooting = 1; %Troubleshooting flag to plot
 
 % Import the PTB dataset using wfdb rdsamp function
 [sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 
@@ -101,4 +102,28 @@ y = filter(b, a, x);
 %% CSV write
 
 csvwrite(outPath, y');
+
+if Troubleshooting
+    figure(1)
+    hold on
+    plot(data(1,:), 'b-')
+    plot(data_base_cor(1,:),'k-')
+    xlabel('samples')
+    ylabel('mV')
+    title("baeline correction step in lead 1")
+    legend('raw data', 'baseline corrected')
+    hold off
+
+    figure(2)
+    hold on
+    plot(data_base_cor(1,:), 'b-')
+    plot(y(1,:),'k-')
+    xlabel('samples')
+    ylabel('mV')
+    title("Powerline noise removal step in lead 1")
+    legend('baseline corrected ', 'powerline filtered')
+    hold off
+
+end
+
 end 
