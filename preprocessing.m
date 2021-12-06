@@ -32,7 +32,7 @@ function [fs] = preprocessing(inPath, outPath, nChannels)
 
 close all;
 
-Troubleshooting = 1; %Troubleshooting flag to plot
+Troubleshooting = 0; %Troubleshooting flag to plot
 
 % Import the PTB dataset using wfdb rdsamp function
 [sig, fs, tm] = rdsamp(inPath, 1:nChannels);% for specific channel 

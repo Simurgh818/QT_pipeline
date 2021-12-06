@@ -31,7 +31,7 @@ Troubleshooting = 1; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-Method_1.Qon = []; Method_1.Toff=[];
+Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak=[];
 Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
@@ -68,8 +68,9 @@ for ch=1:nChannels
     ecg=lp_filter_1000(ecg);
     heasig.nsamp=length(ecg);
 %     beats=wavedet_3D(ecg,[],heasig);
-    beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
-    beats.Toff = beats.Toff(~isnan(beats.Toff));
+%     beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
+%     beats.Toff = beats.Toff(~isnan(beats.Toff));
+    Method_2.Rpeak(ch,:) = beats.R;
     Method_2.Qon(ch,:)= beats.QRSon;
     Method_2.Toff(ch,:)= beats.Toff;
 end
@@ -204,6 +205,7 @@ figExt = ['.fig';'.eps'; '.png'];
 [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
 [L, ~] = size(data_base_cor_csv); %length of the signal
 
+Method_1.Rpeak = rPeaks;
 Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:)*fs));% waveParams.q have large negative values fpr recprd se;16272
 Method_1.Toff = round(rPeaks+(waveParams.t(1,:)*fs));
 Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
@@ -211,7 +213,8 @@ Method_1.Qon(Method_1.Qon<0)=0;
 Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
 Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
 
-Method_2.Rpeak = floor(beats.R(~isnan(beats.R))*fs/fs2); 
+
+Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2); 
 Method_2.Qon = round(Method_2.Qon(1,:)*fs/fs2);
 Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2);
 
@@ -256,12 +259,13 @@ fileName = fullfile(figPath, csv_fileName);
 if Troubleshooting
     figure(3)
     hold on
-    plot(1:L, data_base_cor_csv(:,1), 'k-')
-    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+')
+    plot(1:L, data_base_cor_csv(:,1), 'k-');
+    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
+    plot(Method_1.Rpeak, data_base_cor_csv(Method_1.Rpeak,1), 'm+', 'LineWidth', 3);
     xlabel('samples')
     ylabel('mV')
     title("R peak detection step in lead 1")
-    legend('preprocessed ', 'Method 2 R peaks')
+    legend({'preprocessed', 'Method 2 R peaks', 'Method 1 R Peaks'});
     hold off
 
 %     figure(4)
