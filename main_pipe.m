@@ -87,11 +87,12 @@ for fn=1:numPatients
         if ~exist(figPath, 'dir')
             mkdir(figPath)
         end
-%       Method_1: Fattahi
-%       Method_2: Li    
-        [Method_2, Method_1] = QT_measurements(outPath, fName, figPath, nChannels, fs);
 %         Reading human annotations
         [humanQT] = humanAnnotations(inPath,'q1c', fName, figPath, fs, nChannels);
+%       Method_1: Fattahi
+%       Method_2: Li    
+        [Method_2, Method_1] = QT_measurements(outPath, fName, figPath, nChannels, fs, humanQT);
+
 
 
     end

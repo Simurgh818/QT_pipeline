@@ -1,4 +1,4 @@
-function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs)
+function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, nChannels, fs, humanQT)
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % QT Interval Estimation:
@@ -27,7 +27,7 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialize variables
 
-Troubleshooting = 1; % Troubleshooting flag to plot every step
+Troubleshooting = 0; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
@@ -154,12 +154,12 @@ for ch=1:nChannels
 
     if ch==1
         Method_1.Rpeak(ch,:) = rPeaks;
-        Method_1.Qon = round(rPeaks-abs(waveParams.q));% waveParams.q have large negative values fpr record se;16272
-        % Method_1.Toff = round(rPeaks+(waveParams.t(1,:)*fs));
+        Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:)));% waveParams.q have large negative values fpr record se;16272
         Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
         % Method_1.Qon(Method_1.Qon<0)=0;
         Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
-        % Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
+        Method_1.Toff = round(rPeaks+(waveParams.t(2,:)*fs));
+        Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
     end
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
@@ -228,18 +228,13 @@ figExt = ['.fig';'.eps'; '.png'];
 % end
 %% Troubleshooting outliers
 
-% 
-% [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
-
-
-
 Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-calc_delay); 
 % Method_2.Rpeak = Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)));
 % Method_2.Rpeak = resample(Method_2.Rpeak, 1,4);
 % Method_2.Rpeak = round(Method_2.Rpeak);
 % round(Method_2.Rpeak(1,~isnan())*fs/fs2); 
 Method_2.Qon = round(Method_2.Qon(1,~isnan(Method_2.Qon(1,:)))*fs/fs2-calc_delay);
-% Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2-calc_delay);
+Method_2.Toff = round(Method_2.Toff(1,~isnan(Method_2.Toff(1,:)))*fs/fs2-calc_delay);
 
 
 % close all;
@@ -272,29 +267,39 @@ if Troubleshooting
     figure(3)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
-
     plot(Method_1.Rpeak(1,:), data_base_cor_csv(Method_1.Rpeak(1,:)), 'm+', 'LineWidth', 3);
+    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
+    plot(humanQT.R, data_base_cor_csv(humanQT.R,1), 'r+','LineWidth', 3);
     xlabel('samples')
     ylabel('mV')
     title("R peak detection step in lead 1")
-    legend({'preprocessed', 'Method 2 R peaks', 'Method 1 R Peaks'});
+    legend({'preprocessed', 'Method 1 R peaks', 'Method 2 R peaks', 'manual R peaks'});
     hold off
 
     figure(4)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
-%     plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', 'LineWidth', 3);
-
-    plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
-%     plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
-    legend('Preprocessed','Method 1 Qon', 'Method 2 Qon')
-%     legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
-%         'Method 2 Q start', 'Method 2 T end');
+    plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'mo', 'LineWidth', 3);
+    plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'go', 'LineWidth', 3);
+    plot(humanQT.Qstart, data_base_cor_csv(humanQT.Qstart,1), 'ro','LineWidth', 3);
+    legend('Preprocessed','Method 1 Qon', 'Method 2 Qon', 'manual Qon')
+    title("Qon detection step in lead 1")
     xlabel('samples');
     ylabel('mV');
     hold off
+
+    figure(5)
+    hold on
+    plot(1:L, data_base_cor_csv(:,1), 'k-');
+    plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'm*', 'LineWidth', 3);
+    plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'g*', 'LineWidth', 3);
+    plot(humanQT.Tend, data_base_cor_csv(humanQT.Tend,1), 'r*','LineWidth', 3);
+    legend('Preprocessed','Method 1 Toff', 'Method 2 Toff', 'manual Toff')
+    title("Toff detection step in lead 1")
+    xlabel('samples');
+    ylabel('mV');
+    hold off
+
 end
 for fx=1:3
     fileName = [fName , '_lead1', figExt(fx,:)];
