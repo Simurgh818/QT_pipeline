@@ -51,6 +51,7 @@ Method_2.QTc1_median_wavelet_SQI=[]; Method_2.GaussQTlc_jQRS=[];
 Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
+fs2 = 1000;
 % Calculating the Q start and T end of the wavelet method
 beats = struct();
 heasig.nsig=1;
@@ -63,9 +64,10 @@ for ch=1:nChannels
 %     output R peak from the base level and pass it up every level
 %     Calculating Q start and T end
     % resample to 1000Hz
-    ecg=resample(data_base_cor_csv(:,ch),1000,fs);
+    ecg=resample(data_base_cor_csv(:,ch),fs2,fs);
+    resample_back = resample(ecg,fs, fs2);
     heasig.freq=1000;
-    ecg=lp_filter_1000(ecg);
+    ecg2=lp_filter_1000(ecg);
     heasig.nsamp=length(ecg);
 %     beats=wavedet_3D(ecg,[],heasig);
 %     beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
@@ -84,7 +86,7 @@ end
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
-fs2 = 1000;
+
 Method_2.QT_mean_jQRS = QT(:,1)/fs2;
 Method_2.QT_median_wavelet = QT(:,2)/fs2;
 Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2; % SQI stands for signal quality >0.9
@@ -213,8 +215,11 @@ Method_1.Qon(Method_1.Qon<0)=0;
 Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
 Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
 
-
-Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2); 
+Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-28); 
+% Method_2.Rpeak = Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)));
+% Method_2.Rpeak = resample(Method_2.Rpeak, 1,4);
+% Method_2.Rpeak = round(Method_2.Rpeak);
+% round(Method_2.Rpeak(1,~isnan())*fs/fs2); 
 Method_2.Qon = round(Method_2.Qon(1,:)*fs/fs2);
 Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2);
 
@@ -261,6 +266,7 @@ if Troubleshooting
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
     plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
+
     plot(Method_1.Rpeak, data_base_cor_csv(Method_1.Rpeak,1), 'm+', 'LineWidth', 3);
     xlabel('samples')
     ylabel('mV')
