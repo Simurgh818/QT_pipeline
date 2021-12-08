@@ -52,6 +52,9 @@ Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
 %% Dr. Method_2's QT measurment
 
 fs2 = 1000;
+[L, ~] = size(data_base_cor_csv); %length of the signal
+ecg = [];
+ecg_filtered = [];
 % Calculating the Q start and T end of the wavelet method
 beats = struct();
 heasig.nsig=1;
@@ -64,10 +67,10 @@ for ch=1:nChannels
 %     output R peak from the base level and pass it up every level
 %     Calculating Q start and T end
     % resample to 1000Hz
-    ecg=resample(data_base_cor_csv(:,ch),fs2,fs);
+    ecg(:,ch)=resample(data_base_cor_csv(:,ch),fs2,fs);
     resample_back = resample(ecg,fs, fs2);
     heasig.freq=1000;
-    ecg2=lp_filter_1000(ecg);
+    ecg_filtered(:,ch)=lp_filter_1000(ecg(:,ch));
     heasig.nsamp=length(ecg);
 %     beats=wavedet_3D(ecg,[],heasig);
 %     beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
@@ -75,6 +78,18 @@ for ch=1:nChannels
     Method_2.Rpeak(ch,:) = beats.R;
     Method_2.Qon(ch,:)= beats.QRSon;
     Method_2.Toff(ch,:)= beats.Toff;
+end
+
+if Troubleshooting
+    [L_ecg,~]= size(ecg);
+    figure(1)
+    plot(1:L_ecg,ecg(:,1), 1:L_ecg,ecg_filtered(:,1));
+    legend('resampled ecg', 'filtered ecg');
+    [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
+    figure(2)
+    plot(1:L_ecg,Xa, 1:L_ecg,Ya(1:L_ecg));
+    legend('resampled ecg', 'aligned filtered ecg');
+    calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
 end
 
 % Calculating Q Start and T end
@@ -136,6 +151,16 @@ for ch=1:nChannels
 %     Quality Control check to exclude QT <0.3 and >0.5 second
     qc_indecies = 0.3<qtInt & qtInt<0.5;
     qtInt = qtInt(qc_indecies);
+
+    if ch==1
+        Method_1.Rpeak(ch,:) = rPeaks;
+        Method_1.Qon = round(rPeaks-abs(waveParams.q));% waveParams.q have large negative values fpr record se;16272
+        % Method_1.Toff = round(rPeaks+(waveParams.t(1,:)*fs));
+        Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
+        % Method_1.Qon(Method_1.Qon<0)=0;
+        Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
+        % Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
+    end
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
     Method_1.QT_mean(ch,1) = nanmean(qtInt(1,:));
@@ -204,24 +229,17 @@ figExt = ['.fig';'.eps'; '.png'];
 %% Troubleshooting outliers
 
 % 
-[GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
-[L, ~] = size(data_base_cor_csv); %length of the signal
+% [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, 1), fs);
 
-Method_1.Rpeak = rPeaks;
-Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:)*fs));% waveParams.q have large negative values fpr recprd se;16272
-Method_1.Toff = round(rPeaks+(waveParams.t(1,:)*fs));
-Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
-Method_1.Qon(Method_1.Qon<0)=0;
-Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
-Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
 
-Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-28); 
+
+Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-calc_delay); 
 % Method_2.Rpeak = Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)));
 % Method_2.Rpeak = resample(Method_2.Rpeak, 1,4);
 % Method_2.Rpeak = round(Method_2.Rpeak);
 % round(Method_2.Rpeak(1,~isnan())*fs/fs2); 
-Method_2.Qon = round(Method_2.Qon(1,:)*fs/fs2);
-Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2);
+Method_2.Qon = round(Method_2.Qon(1,~isnan(Method_2.Qon(1,:)))*fs/fs2-calc_delay);
+% Method_2.Toff = round(Method_2.Toff(1,:)*fs/fs2-calc_delay);
 
 
 % close all;
@@ -250,34 +268,33 @@ csv_fileName = [fName, '_QT_results.csv'];
 fileName = fullfile(figPath, csv_fileName);
     writetable(joined_tables, fileName);
 
-
-
-% Need to multiply by fs2 
-% plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
-% plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
-% legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
-%     'Method 2 Q start', 'Method 2 T end');
-% xlabel('samples');
-% ylabel('mV');
-% hold off
-
 if Troubleshooting
     figure(3)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
     plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
 
-    plot(Method_1.Rpeak, data_base_cor_csv(Method_1.Rpeak,1), 'm+', 'LineWidth', 3);
+    plot(Method_1.Rpeak(1,:), data_base_cor_csv(Method_1.Rpeak(1,:)), 'm+', 'LineWidth', 3);
     xlabel('samples')
     ylabel('mV')
     title("R peak detection step in lead 1")
     legend({'preprocessed', 'Method 2 R peaks', 'Method 1 R Peaks'});
     hold off
 
-%     figure(4)
-%     plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
+    figure(4)
+    hold on
+    plot(1:L, data_base_cor_csv(:,1), 'k-');
+    plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'bo', 'LineWidth', 3);
 %     plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'ro', 'LineWidth', 3);
 
+    plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'b*', 'LineWidth', 3);
+%     plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'r*', 'LineWidth', 3);
+    legend('Preprocessed','Method 1 Qon', 'Method 2 Qon')
+%     legend('Lead1','Method 1 Q start', 'Method 1 T end', ...
+%         'Method 2 Q start', 'Method 2 T end');
+    xlabel('samples');
+    ylabel('mV');
+    hold off
 end
 for fx=1:3
     fileName = [fName , '_lead1', figExt(fx,:)];
