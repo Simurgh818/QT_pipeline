@@ -27,11 +27,11 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialize variables
 
-Troubleshooting = 0; % Troubleshooting flag to plot every step
+Troubleshooting = 1; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak={};Method_1.RR={};
+Method_1.Qon = {}; Method_1.Toff={}; Method_1.Rpeak={};Method_1.RR={};
 Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
@@ -40,8 +40,8 @@ Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % Q
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
 Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak=[]; Method_2.RR=[];
-Method_2.RR_mean=[]; Method_2.RR_median=[]; Method_2.QT=[];
-Method_2.QT_median=[]; Method_2.QT_mean=[];
+Method_2.RR_mean=[]; Method_2.RR_median=[]; 
+Method_2.QT_median=[]; Method_2.QT_mean=[];Method_2.QT=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
 Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
@@ -84,20 +84,24 @@ end
 
 if Troubleshooting
     [L_ecg,~]= size(ecg);
-    figure(1)
-    plot(1:L_ecg,ecg(:,1), 1:L_ecg,ecg_filtered(:,1));
-    legend('resampled ecg', 'filtered ecg');
-    
-    figure(2)
-    plot(1:L_ecg,Xa, 1:L_ecg,Ya(1:L_ecg));
-    legend('resampled ecg', 'aligned filtered ecg');
+%     figure(1)
+%     plot(1:L_ecg,ecg(:,1), 1:L_ecg,ecg_filtered(:,1));
+%     legend('resampled ecg', 'filtered ecg');
+%     
+%     figure(2)
+%     plot(1:L_ecg,Xa, 1:L_ecg,Ya(1:L_ecg));
+%     legend('resampled ecg', 'aligned filtered ecg');
     
 end
 
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
+Method_2.QT = (Method_2.Toff-Method_2.Qon)/fs;
+Method_2.QT_median = median(Method_2.QT, 2);
+Method_2.QT_mean = mean(Method_2.QT, 2);
 
+% ToDo: comment out jQRS and wavelet ones out.
 Method_2.QT_mean_jQRS = QT(:,1)/fs2;
 Method_2.QT_median_wavelet = QT(:,2)/fs2;
 Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2; % SQI stands for signal quality >0.9
@@ -115,6 +119,7 @@ Method_2_iqr_upper = prctile(Method_2.QT_median_wavelet, 75)+Method_2_IQR; %calc
 Method_2_indecies = Method_2_iqr_lower<Method_2.QT_median_wavelet & Method_2.QT_median_wavelet <Method_2_iqr_upper;
 Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median_wavelet(Method_2_indecies)); % median QT across the interquartile range
 
+% ToDo: comment out jQRS and wavelet ones out.
 % RR = [rr_jQRS, medianRR_wavelet, meanRR_wavelet]
 Method_2.RR_jQRS = RR(:,1); 
 Method_2.RR_median_wavelet =  RR(:,2);
@@ -148,15 +153,25 @@ for ch=1:nChannels
     qc_indecies = 0.3<qtInt & qtInt<0.5;
     qtInt = qtInt(qc_indecies);
     Method_1.Rpeak(ch,:) = {rPeaks};
-
-    if ch==1
-        Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:))-9);% waveParams.q have large negative values fpr record se;16272
-        Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
-        % Method_1.Qon(Method_1.Qon<0)=0;
-        Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
-        Method_1.Toff = round(rPeaks+(waveParams.t(2,:)*fs));
-        Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
+    Method_1.Qon(ch,:) = {round(rPeaks-abs(waveParams.q(1,:))*fs)};% waveParams.q have large negative values for record se;16272
+    Method_1.Toff(ch,:) = {round(rPeaks+(waveParams.t(2,:)*fs))};
+    [~, Len_Rpeak] = size(Method_1.Rpeak{ch});
+    for idx=1 : Len_Rpeak
+        if isnan(Method_1.Qon{ch, 1}(idx)) || isnan(Method_1.Toff{ch, 1}(idx)) ||...
+                Method_1.Qon{ch, 1}(idx)<0 || Method_1.Toff{ch, 1}(idx)<0
+            Method_1.Rpeak{ch, 1}(idx)=NaN ;
+            Method_1.Qon{ch, 1}(idx)=NaN;
+            Method_1.Toff{ch, 1}(idx)=NaN;
+        end
     end
+    Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
+    Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
+    Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
+
+    % Method_1.Qon(Method_1.Qon<0)=0;
+%         Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
+
+   
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt);
     Method_1.QT_mean(ch,1) = nanmean(qtInt);
@@ -165,11 +180,6 @@ for ch=1:nChannels
     Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks)/fs) ;
 end
 
-% Calculating RR intervals
-% [~, dimQT] = size(Method_1.Rpeak(1,:));
-% for r=1:(dimQT-1)
-%     Method_1.RR (r,1) = (Method_1.Rpeak(1,r+1)-Method_1.Rpeak(1,r))/fs;
-% end
 
 % Calculate median of interquartile range of 25-75%
 Method_1_IQR = iqr(Method_1.QT_median,1);
@@ -264,25 +274,26 @@ fileName = fullfile(figPath, csv_fileName);
     writetable(joined_tables, fileName);
 
 if Troubleshooting
-    figure(3)
-    hold on
-    plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(Method_1.Rpeak(1,:), data_base_cor_csv(Method_1.Rpeak(1,:)), 'm+', 'LineWidth', 3);
-    plot(Method_2.Rpeak, data_base_cor_csv(Method_2.Rpeak,1), 'g+','LineWidth', 3);
-    plot(humanQT.R, data_base_cor_csv(humanQT.R,1), 'r+','LineWidth', 3);
-    xlabel('samples')
-    ylabel('mV')
-    title("R peak detection step in lead 1")
-    legend({'preprocessed', 'Method 1 R peaks', 'Method 2 R peaks', 'manual R peaks'});
-    hold off
+%     figure(3)
+%     hold on
+%     plot(1:L, data_base_cor_csv(:,1), 'k-');
+%     plot(cell2mat(Method_1.Rpeak(1,1)), data_base_cor_csv(cell2mat(Method_1.Rpeak(1,1))), 'm+', 'LineWidth', 3);
+%     plot(Method_2.Rpeak(1,:), data_base_cor_csv(Method_2.Rpeak(1,:),1), 'g+','LineWidth', 3);
+%     plot(humanQT.R, data_base_cor_csv(humanQT.R,1), 'r+','LineWidth', 3);
+%     xlabel('samples')
+%     ylabel('mV')
+%     title("R peak detection step in lead 1")
+%     legend({'preprocessed', 'Method 1 R peaks', 'Method 2 R peaks', 'manual R peaks'});
+%     hold off
 
     figure(4)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(Method_1.Qon, data_base_cor_csv(Method_1.Qon,1), 'mo', 'LineWidth', 3);
-    plot(Method_2.Qon, data_base_cor_csv(Method_2.Qon,1), 'go', 'LineWidth', 3);
+    plot(cell2mat(Method_1.Qon(1,1)), data_base_cor_csv(cell2mat(Method_1.Qon(1,1)),1), 'mo', 'LineWidth', 3);
+    plot(cell2mat(Method_1.Rpeak(1,1)), data_base_cor_csv(cell2mat(Method_1.Rpeak(1,1))), 'b+', 'LineWidth', 3);
+    plot(Method_2.Qon(1,:), data_base_cor_csv(Method_2.Qon(1,:),1), 'go', 'LineWidth', 3);
     plot(humanQT.Qstart, data_base_cor_csv(humanQT.Qstart,1), 'ro','LineWidth', 3);
-    legend('Preprocessed','Method 1 Qon', 'Method 2 Qon', 'manual Qon')
+    legend('Preprocessed','Method 1 Qon', 'R peaks', 'Method 2 Qon', 'manual Qon')
     title("Qon detection step in lead 1")
     xlabel('samples');
     ylabel('mV');
@@ -291,8 +302,8 @@ if Troubleshooting
     figure(5)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(Method_1.Toff, data_base_cor_csv(Method_1.Toff,1), 'm*', 'LineWidth', 3);
-    plot(Method_2.Toff, data_base_cor_csv(Method_2.Toff,1), 'g*', 'LineWidth', 3);
+    plot(cell2mat(Method_1.Toff(1,1)), data_base_cor_csv(cell2mat(Method_1.Toff(1,1)),1), 'm*', 'LineWidth', 3);
+    plot(Method_2.Toff(1,:), data_base_cor_csv(Method_2.Toff(1,:),1), 'g*', 'LineWidth', 3);
     plot(humanQT.Tend, data_base_cor_csv(humanQT.Tend,1), 'r*','LineWidth', 3);
     legend('Preprocessed','Method 1 Toff', 'Method 2 Toff', 'manual Toff')
     title("Toff detection step in lead 1")
