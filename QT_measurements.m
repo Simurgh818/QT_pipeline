@@ -31,7 +31,7 @@ Troubleshooting = 0; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak=[];Method_1.RR=[];
+Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak={};Method_1.RR={};
 Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
@@ -95,11 +95,6 @@ if Troubleshooting
 end
 
 
-% [~, dimQT] = size(Method_2.Rpeak(1,:));
-% for r=1:(dimQT-1)
-%     Method_2.RR (r, 1) = (Method_2.Rpeak(1,r+1)-Method_2.Rpeak(1,r))/fs;
-% end
-
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
 
@@ -152,9 +147,9 @@ for ch=1:nChannels
 %     Quality Control check to exclude QT <0.3 and >0.5 second
     qc_indecies = 0.3<qtInt & qtInt<0.5;
     qtInt = qtInt(qc_indecies);
+    Method_1.Rpeak(ch,:) = {rPeaks};
 
     if ch==1
-        Method_1.Rpeak(ch,:) = rPeaks;
         Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:))-9);% waveParams.q have large negative values fpr record se;16272
         Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
         % Method_1.Qon(Method_1.Qon<0)=0;
@@ -165,15 +160,16 @@ for ch=1:nChannels
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt);
     Method_1.QT_mean(ch,1) = nanmean(qtInt);
+    Method_1.RR(ch,:) = {diff(rPeaks)/fs};
     Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs);
     Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks)/fs) ;
 end
 
 % Calculating RR intervals
-[~, dimQT] = size(Method_1.Rpeak(1,:));
-for r=1:(dimQT-1)
-    Method_1.RR (r,1) = (Method_1.Rpeak(1,r+1)-Method_1.Rpeak(1,r))/fs;
-end
+% [~, dimQT] = size(Method_1.Rpeak(1,:));
+% for r=1:(dimQT-1)
+%     Method_1.RR (r,1) = (Method_1.Rpeak(1,r+1)-Method_1.Rpeak(1,r))/fs;
+% end
 
 % Calculate median of interquartile range of 25-75%
 Method_1_IQR = iqr(Method_1.QT_median,1);
