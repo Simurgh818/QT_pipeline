@@ -79,24 +79,28 @@ for ch=1:nChannels
     Method_2.Qon(ch,:)= beats.QRSon;
     Method_2.Toff(ch,:)= beats.Toff;
 end
-
+[Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
+calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
 if Troubleshooting
     [L_ecg,~]= size(ecg);
     figure(1)
     plot(1:L_ecg,ecg(:,1), 1:L_ecg,ecg_filtered(:,1));
     legend('resampled ecg', 'filtered ecg');
-    [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
+    
     figure(2)
     plot(1:L_ecg,Xa, 1:L_ecg,Ya(1:L_ecg));
     legend('resampled ecg', 'aligned filtered ecg');
-    calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
+    
 end
+Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-calc_delay); 
 
-% Calculating Q Start and T end
-% QR = beats.QRSon;
-% RT = beats.Toff;
-% Method_2.QR_mean = mean(QR);
-% Method_2.RT_mean = mean(RT);
+Method_2.Qon = round(Method_2.Qon(1,~isnan(Method_2.Qon(1,:)))*fs/fs2-calc_delay);
+Method_2.Toff = round(Method_2.Toff(1,~isnan(Method_2.Toff(1,:)))*fs/fs2-calc_delay);
+
+[~, dimQT] = size(Method_2.Rpeak(1,:));
+for r=1:(dimQT-1)
+    Method_2.RR (r, 1) = (Method_2.Rpeak(1,r+1)-Method_2.Rpeak(1,r))/fs;
+end
 
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
@@ -162,10 +166,16 @@ for ch=1:nChannels
         Method_1.Toff = Method_1.Toff(~isnan(Method_1.Toff));
     end
 
-    Method_1.QT_median(ch,1)= nanmedian(qtInt(1,:));
-    Method_1.QT_mean(ch,1) = nanmean(qtInt(1,:));
+    Method_1.QT_median(ch,1)= nanmedian(qtInt);
+    Method_1.QT_mean(ch,1) = nanmean(qtInt);
     Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs );
     Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks))/fs ;
+end
+
+% Calculating RR intervals
+[~, dimQT] = size(Method_1.Rpeak(1,:));
+for r=1:(dimQT-1)
+    Method_1.RR (r,1) = (Method_1.Rpeak(1,r+1)-Method_1.Rpeak(1,r))/fs;
 end
 
 % Calculate median of interquartile range of 25-75%
@@ -228,13 +238,10 @@ figExt = ['.fig';'.eps'; '.png'];
 % end
 %% Troubleshooting outliers
 
-Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-calc_delay); 
 % Method_2.Rpeak = Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)));
 % Method_2.Rpeak = resample(Method_2.Rpeak, 1,4);
 % Method_2.Rpeak = round(Method_2.Rpeak);
 % round(Method_2.Rpeak(1,~isnan())*fs/fs2); 
-Method_2.Qon = round(Method_2.Qon(1,~isnan(Method_2.Qon(1,:)))*fs/fs2-calc_delay);
-Method_2.Toff = round(Method_2.Toff(1,~isnan(Method_2.Toff(1,:)))*fs/fs2-calc_delay);
 
 
 % close all;
