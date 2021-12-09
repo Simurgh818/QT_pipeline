@@ -158,7 +158,7 @@ for ch=1:nChannels
 
     if ch==1
         Method_1.Rpeak(ch,:) = rPeaks;
-        Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:)));% waveParams.q have large negative values fpr record se;16272
+        Method_1.Qon = round(rPeaks-abs(waveParams.q(1,:))-9);% waveParams.q have large negative values fpr record se;16272
         Method_1.Qon = Method_1.Qon(~isnan(Method_1.Qon));
         % Method_1.Qon(Method_1.Qon<0)=0;
         Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
