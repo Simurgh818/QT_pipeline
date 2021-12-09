@@ -31,7 +31,7 @@ Troubleshooting = 0; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
-Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak=[];
+Method_1.Qon = []; Method_1.Toff=[]; Method_1.Rpeak=[];Method_1.RR=[];
 Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
@@ -39,9 +39,9 @@ Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % Q
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
-Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak=[];
-Method_2.QR_mean=[]; Method_2.QR_median=[];
-Method_2.RT_mean=[]; Method_2.RT_median=[];
+Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak=[]; Method_2.RR=[];
+Method_2.RR_mean=[]; Method_2.RR_median=[]; Method_2.QT=[];
+Method_2.QT_median=[]; Method_2.QT_mean=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
 Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
@@ -69,18 +69,19 @@ for ch=1:nChannels
     % resample to 1000Hz
     ecg(:,ch)=resample(data_base_cor_csv(:,ch),fs2,fs);
     resample_back = resample(ecg,fs, fs2);
-    heasig.freq=1000;
     ecg_filtered(:,ch)=lp_filter_1000(ecg(:,ch));
-    heasig.nsamp=length(ecg);
-%     beats=wavedet_3D(ecg,[],heasig);
-%     beats.QRSon = beats.QRSon(~isnan(beats.QRSon));
-%     beats.Toff = beats.Toff(~isnan(beats.Toff));
-    Method_2.Rpeak(ch,:) = beats.R;
-    Method_2.Qon(ch,:)= beats.QRSon;
-    Method_2.Toff(ch,:)= beats.Toff;
+    [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
+    calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
+    
+    Method_2.Rpeak(ch,:) = beats.R(~isnan(beats.R));
+    Method_2.Rpeak(ch,:) = round(Method_2.Rpeak(ch,:)*fs/fs2-calc_delay); 
+    Method_2.RR(ch,:) = diff(Method_2.Rpeak(ch,:))/fs;
+    Method_2.Qon(ch,:)= beats.QRSon(~isnan(beats.QRSon));
+    Method_2.Qon(ch,:) = round(Method_2.Qon(ch,:)*fs/fs2-calc_delay);
+    Method_2.Toff(ch,:)= beats.Toff(~isnan(beats.Toff));
+    Method_2.Toff(ch,:) = round(Method_2.Toff(ch,:)*fs/fs2-calc_delay);
 end
-[Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
-calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
+
 if Troubleshooting
     [L_ecg,~]= size(ecg);
     figure(1)
@@ -92,16 +93,12 @@ if Troubleshooting
     legend('resampled ecg', 'aligned filtered ecg');
     
 end
-Method_2.Rpeak = round(Method_2.Rpeak(1,~isnan(Method_2.Rpeak(1,:)))*fs/fs2-calc_delay); 
 
-Method_2.Qon = round(Method_2.Qon(1,~isnan(Method_2.Qon(1,:)))*fs/fs2-calc_delay);
-Method_2.Toff = round(Method_2.Toff(1,~isnan(Method_2.Toff(1,:)))*fs/fs2-calc_delay);
 
-[~, dimQT] = size(Method_2.Rpeak(1,:));
-for r=1:(dimQT-1)
-    Method_2.RR (r, 1) = (Method_2.Rpeak(1,r+1)-Method_2.Rpeak(1,r))/fs;
-end
-
+% [~, dimQT] = size(Method_2.Rpeak(1,:));
+% for r=1:(dimQT-1)
+%     Method_2.RR (r, 1) = (Method_2.Rpeak(1,r+1)-Method_2.Rpeak(1,r))/fs;
+% end
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
@@ -116,8 +113,6 @@ Method_2.QT_median_wavelet_SQI = QT(:,3)/fs2; % SQI stands for signal quality >0
 Method_2.GaussQT_jQRS = QT(:,4)/fs2; 
 Method_2.GaussQT_SQI = QT(:,5)/fs2;
 
-
-
 % Calculate median of interquartile range of 25-75%
 Method_2_IQR = iqr(Method_2.QT_median_wavelet,1);
 Method_2_iqr_lower = prctile(Method_2.QT_median_wavelet, 25)-Method_2_IQR; %calc lower IQR
@@ -129,6 +124,8 @@ Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median_wavelet(Metho
 Method_2.RR_jQRS = RR(:,1); 
 Method_2.RR_median_wavelet =  RR(:,2);
 Method_2.RR_mean_wavelet =  RR(:,3); 
+Method_2.RR_median = median(Method_2.RR, 2);
+Method_2.RR_mean = mean(Method_2.RR, 2);
 
 % Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
 Method_2.QTc1_mean_jQRS = Method_2.QT_mean_jQRS + 0.154*(1-Method_2.RR_jQRS);
@@ -168,8 +165,8 @@ for ch=1:nChannels
 
     Method_1.QT_median(ch,1)= nanmedian(qtInt);
     Method_1.QT_mean(ch,1) = nanmean(qtInt);
-    Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs );
-    Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks))/fs ;
+    Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs);
+    Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks)/fs) ;
 end
 
 % Calculating RR intervals
