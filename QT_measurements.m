@@ -69,8 +69,11 @@ for ch=1:nChannels
     % resample to 1000Hz
     ecg(:,ch)=resample(data_base_cor_csv(:,ch),fs2,fs);
     resample_back = resample(ecg,fs, fs2);
-    ecg_filtered(:,ch)=lp_filter_1000(ecg(:,ch));
-    [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
+    ecg_filtered(:,ch)=lp_filter_1000(ecg(:,ch)); % They are using a FIR 
+    % linear filter, which has a constat group delay: delay=
+    % (length(b)-1)/2, length(b)=233
+    D = (233-1)/2;
+%     [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
     calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
     
     Method_2.Rpeak(ch,:) = beats.R(~isnan(beats.R));
@@ -163,11 +166,31 @@ for ch=1:nChannels
             Method_1.Qon{ch, 1}(idx)=NaN;
             Method_1.Toff{ch, 1}(idx)=NaN;
         end
+        if  idx >2 && (idx+1)<=Len_Rpeak &&...
+                (Method_1.Qon{ch, 1}(idx) >  Method_1.Qon{ch, 1}(idx+1) ||...
+                Method_1.Qon{ch, 1}(idx) <  Method_1.Qon{ch, 1}(idx-1))
+            Method_1.Qon{ch, 1}(idx)=NaN;
+            Method_1.Rpeak{ch, 1}(idx)=NaN;
+            Method_1.Toff{ch, 1}(idx)=NaN;
+        end
     end
     Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
     Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
     Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
-
+    
+    [~, Len_Rpeak] = size(Method_1.Rpeak{ch});
+    for idx=1 : Len_Rpeak
+        if  idx >2 && (idx+1)<=Len_Rpeak &&...
+                (Method_1.Qon{ch, 1}(idx) >  Method_1.Qon{ch, 1}(idx+1) ||...
+                Method_1.Qon{ch, 1}(idx) <  Method_1.Qon{ch, 1}(idx-1))
+            Method_1.Qon{ch, 1}(idx)=NaN;
+            Method_1.Rpeak{ch, 1}(idx)=NaN;
+            Method_1.Toff{ch, 1}(idx)=NaN;
+        end
+    end
+    Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
+    Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
+    Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
     % Method_1.Qon(Method_1.Qon<0)=0;
 %         Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
 
