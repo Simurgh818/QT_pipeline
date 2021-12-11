@@ -39,7 +39,7 @@ Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % Q
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
-Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak=[]; Method_2.RR=[];
+Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak={}; Method_2.RR={};
 Method_2.RR_mean=[]; Method_2.RR_median=[]; 
 Method_2.QT_median=[]; Method_2.QT_mean=[];Method_2.QT=[];
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
@@ -77,9 +77,11 @@ for ch=1:nChannels
 %     [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
     calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
     
-    Method_2.Rpeak(ch,:) = beats.R(~isnan(beats.R));
-    Method_2.Rpeak(ch,:) = round(Method_2.Rpeak(ch,:)*fs/fs2-calc_delay); 
-    Method_2.RR(ch,:) = diff(Method_2.Rpeak(ch,:))/fs;
+    Method_2.Rpeak(ch,:) = {beats.R(~isnan(beats.R))};
+    Method_2.Rpeak(ch,:) = {round(Method_2.Rpeak{ch,:}*fs/fs2-calc_delay)};
+    Method_2.RR(ch,:) = {diff(cell2mat(Method_2.Rpeak(ch,:)))/fs};
+    Method_2.RR_median(ch,:) = median(cell2mat(Method_2.RR(ch, 1)), 2);
+    Method_2.RR_mean(ch,:) = mean(cell2mat(Method_2.RR(ch, 1)), 2);
     Method_2.Qon(ch,:)= beats.QRSon(~isnan(beats.QRSon));
     Method_2.Qon(ch,:) = round(Method_2.Qon(ch,:)*fs/fs2-calc_delay);
     Method_2.Toff(ch,:)= beats.Toff(~isnan(beats.Toff));
@@ -128,8 +130,7 @@ Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median(Method_2_inde
 Method_2.RR_jQRS = RR(:,1); 
 Method_2.RR_median_wavelet =  RR(:,2);
 Method_2.RR_mean_wavelet =  RR(:,3); 
-Method_2.RR_median = median(Method_2.RR, 2);
-Method_2.RR_mean = mean(Method_2.RR, 2);
+
 
 % Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR)
 Method_2.QTc1_median= Method_2.QT_median + 0.154*(1-Method_2.RR_median);
@@ -175,11 +176,27 @@ for ch=1:nChannels
             Method_1.Rpeak{ch, 1}(idx)=NaN;
             Method_1.Toff{ch, 1}(idx)=NaN;
         end
+
     end
     Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
     Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
     Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
-    
+%     Excluding Qon that don't belong to a beat
+    [~, Len_Rpeak] = size(Method_1.Rpeak{ch});
+    for idx=1 : Len_Rpeak
+        if  idx >2 &&...
+                (Method_1.Qon{ch, 1}(idx) >  Method_1.Rpeak{ch, 1}(idx) ||...
+                Method_1.Qon{ch, 1}(idx) <  Method_1.Rpeak{ch, 1}(idx-1))
+            Method_1.Qon{ch, 1}(idx)=NaN;
+            Method_1.Rpeak{ch, 1}(idx)=NaN;
+            Method_1.Toff{ch, 1}(idx)=NaN;
+        end
+        
+    end
+    Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
+    Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
+    Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
+
    %     Quality Control check to exclude QT <0.3 and >0.5 second
 %     qc_indecies = 0.3<qtInt & qtInt<0.5;
 %     qtInt = qtInt(qc_indecies);
@@ -189,6 +206,7 @@ for ch=1:nChannels
     Method_1.QT(ch,:) = {(cell2mat(Method_1.Toff(ch,:))-cell2mat(Method_1.Qon(ch,:)))/fs};
     qc_QT_indices(ch,:) = {0.3<Method_1.QT{ch,:} & Method_1.QT{ch,:}<0.5};
     Method_1.QT(ch,:) = {Method_1.QT{ch,:}(qc_QT_indices{ch,1})};
+
     Method_1.QT_median(ch,:) = median(cell2mat(Method_1.QT(ch,:)), 2);
     Method_1.QT_mean(ch,:) = mean(cell2mat(Method_1.QT(ch,:)), 2);
 
@@ -264,20 +282,20 @@ figExt = ['.fig';'.eps'; '.png'];
 % round(Method_2.Rpeak(1,~isnan())*fs/fs2); 
 
 
-% close all;
+
 %% save results as a csv
 
 % colName = 'channelNum';
-Method_2_colNames = {'channelNum', 'Method_2_QTc1_median', 'Method_2_QTc1_mean',...
-    'Method_2_QTc1_median_IQR', 'Method_2_RR_median', 'Method_2_RR_mean'};
+Method_2_colNames = {'channelNum', 'Method2_QTc1_median', 'Method2_QTc1_mean',...
+    'Method2_QTc1_median_IQR', 'Method2_RR_median', 'Method2_RR_mean'};
 channelNum = [1:nChannels]';
 Method_2_table = table(channelNum, Method_2.QT_median ,Method_2.QTc1_mean,...
     Method_2.QTc1_median_IQR, Method_2.RR_median, Method_2.RR_mean...
     , 'VariableNames',Method_2_colNames);
 
-Method_1_colNames = {'channelNum', 'Method_1_QTc1_median', ...
-    'Method_1_QTc1_mean', 'Method_1_QTc1_median_IQR', 'Method_1_RR_median',...
-    'Method_1_RR_mean'};
+Method_1_colNames = {'channelNum', 'Method1_QTc1_median', ...
+    'Method1_QTc1_mean', 'Method1_QTc1_median_IQR', 'Method1_RR_median',...
+    'Method1_RR_mean'};
 
 Method_1_table = table(channelNum, Method_1.QTc1_median, Method_1.QTc1_mean,...
     Method_1.QTc1_median_IQR, Method_1.RR_median, Method_1.RR_mean,...
@@ -329,6 +347,7 @@ if Troubleshooting
     hold off
 
 end
+close all;
 for fx=1:3
     fileName = [fName , '_lead1', figExt(fx,:)];
     figName = fullfile(figPath, fileName);
