@@ -39,9 +39,9 @@ Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % Q
 
 QT = zeros(nChannels,5);
 RR = zeros(nChannels, 3);
-Method_2.Qon=[]; Method_2.Toff=[]; Method_2.Rpeak={}; Method_2.RR={};
+Method_2.Qon={}; Method_2.Toff={}; Method_2.Rpeak={}; Method_2.RR={};
 Method_2.RR_mean=[]; Method_2.RR_median=[]; 
-Method_2.QT_median=[]; Method_2.QT_mean=[];Method_2.QT=[];
+Method_2.QT_median=[]; Method_2.QT_mean=[];Method_2.QT={};
 Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[]; 
 Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
@@ -76,20 +76,27 @@ for ch=1:nChannels
     D = (233-1)/2;
 %     [Xa, Ya, D]=alignsignals(ecg_filtered(:,1), ecg(:,1));
     calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
-    
+%     Todo: similar to method 1, for each beat that is missing Qon or Toff,
+%     sikip the beat
+
     Method_2.Rpeak(ch,:) = {beats.R(~isnan(beats.R))};
     Method_2.Rpeak(ch,:) = {round(Method_2.Rpeak{ch,:}*fs/fs2-calc_delay)};
     Method_2.RR(ch,:) = {diff(cell2mat(Method_2.Rpeak(ch,:)))/fs};
     Method_2.RR_median(ch,:) = median(cell2mat(Method_2.RR(ch, 1)), 2);
     Method_2.RR_mean(ch,:) = mean(cell2mat(Method_2.RR(ch, 1)), 2);
-    Method_2.Qon(ch,:)= beats.QRSon(~isnan(beats.QRSon));
-    Method_2.Qon(ch,:) = round(Method_2.Qon(ch,:)*fs/fs2-calc_delay);
-    Method_2.Toff(ch,:)= beats.Toff(~isnan(beats.Toff));
-    Method_2.Toff(ch,:) = round(Method_2.Toff(ch,:)*fs/fs2-calc_delay);
+    
+    Method_2.Qon(ch,:)= {beats.QRSon(~isnan(beats.QRSon))};
+    Method_2.Qon(ch,:) = {round(Method_2.Qon{ch,:}*fs/fs2-calc_delay)};
+    Method_2.Toff(ch,:)= {beats.Toff(~isnan(beats.Toff))};
+    Method_2.Toff(ch,:) = {round(Method_2.Toff{ch,:}*fs/fs2-calc_delay)};
+    
+    Method_2.QT(ch,:) = {(cell2mat(Method_2.Toff(ch,:))-cell2mat(Method_2.Qon(ch,:)))/fs};
+    Method_2.QT_median(ch,:) = median(cell2mat(Method_2.QT(ch, :)), 2);
+    Method_2.QT_mean(ch,:) = mean(cell2mat(Method_2.QT(ch,:)), 2);
 end
 
 if Troubleshooting
-    [L_ecg,~]= size(ecg);
+%     [L_ecg,~]= size(ecg);
 %     figure(1)
 %     plot(1:L_ecg,ecg(:,1), 1:L_ecg,ecg_filtered(:,1));
 %     legend('resampled ecg', 'filtered ecg');
@@ -103,9 +110,6 @@ end
 
 % Since the QT_analysis_single_lead resamples the signal to 1000 Hz, need
 % to use this sampling frequency to convert to seconds
-Method_2.QT = (Method_2.Toff-Method_2.Qon)/fs;
-Method_2.QT_median = median(Method_2.QT, 2);
-Method_2.QT_mean = mean(Method_2.QT, 2);
 
 % ToDo: comment out jQRS and wavelet ones out.
 Method_2.QT_mean_jQRS = QT(:,1)/fs2;
