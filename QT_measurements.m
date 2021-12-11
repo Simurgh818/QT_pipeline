@@ -27,12 +27,12 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialize variables
 
-Troubleshooting = 1; % Troubleshooting flag to plot every step
+Troubleshooting = 0; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
 Method_1.Qon = {}; Method_1.Toff={}; Method_1.Rpeak={};Method_1.RR={};
-Method_1.QT_mean=[]; Method_1.QT_median = []; 
+Method_1.QT={}; Method_1.QT_mean=[]; Method_1.QT_median = []; 
 Method_1.RR_mean=[]; Method_1.RR_median = []; Method_1.QT_median_IQR = [];
 Method_1.QTc1_mean=[]; Method_1.QTc1_median=[]; Method_1.QTc1_median_IQR=[];% QTc1 is correction by Sagie's formula
 Method_1.QTc2_mean=[]; Method_1.QTc2_median=[]; Method_1.QTc2_median_IQR=[]; % QTc2 is correction by Bazett's formula
@@ -46,6 +46,7 @@ Method_2.QT_mean_jQRS=[]; Method_2.QT_median_wavelet=[];
 Method_2.QT_median_wavelet_SQI=[]; Method_2.GaussQT_jQRS=[]; 
 Method_2.GaussQT_SQI=[];
 Method_2.RR_jQRS=[]; Method_2.RR_median_wavelet=[]; Method_2.RR_mean_wavelet=[];
+Method_2.QTc1_median=[];Method_2.QTc1_mean =[];
 Method_2.QT_median_IQR=[]; Method_2.QTc1_mean_jQRS=[]; Method_2.QTc1_median_wavelet=[];
 Method_2.QTc1_median_wavelet_SQI=[]; Method_2.GaussQTlc_jQRS=[]; 
 Method_2.GaussQTlc_SQI=[]; Method_2.QTc1_median_IQR=[];
@@ -116,11 +117,11 @@ Method_2.GaussQT_jQRS = QT(:,4)/fs2;
 Method_2.GaussQT_SQI = QT(:,5)/fs2;
 
 % Calculate median of interquartile range of 25-75%
-Method_2_IQR = iqr(Method_2.QT_median_wavelet,1);
-Method_2_iqr_lower = prctile(Method_2.QT_median_wavelet, 25)-Method_2_IQR; %calc lower IQR
-Method_2_iqr_upper = prctile(Method_2.QT_median_wavelet, 75)+Method_2_IQR; %calc upper IQR
-Method_2_indecies = Method_2_iqr_lower<Method_2.QT_median_wavelet & Method_2.QT_median_wavelet <Method_2_iqr_upper;
-Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median_wavelet(Method_2_indecies)); % median QT across the interquartile range
+Method_2_IQR = iqr(Method_2.QT_median,1);
+Method_2_iqr_lower = prctile(Method_2.QT_median, 25)-Method_2_IQR; %calc lower IQR
+Method_2_iqr_upper = prctile(Method_2.QT_median, 75)+Method_2_IQR; %calc upper IQR
+Method_2_indecies = Method_2_iqr_lower<Method_2.QT_median & Method_2.QT_median <Method_2_iqr_upper;
+Method_2.QT_median_IQR(1:nChannels, 1) = median(Method_2.QT_median(Method_2_indecies)); % median QT across the interquartile range
 
 % ToDo: comment out jQRS and wavelet ones out.
 % RR = [rr_jQRS, medianRR_wavelet, meanRR_wavelet]
@@ -130,14 +131,16 @@ Method_2.RR_mean_wavelet =  RR(:,3);
 Method_2.RR_median = median(Method_2.RR, 2);
 Method_2.RR_mean = mean(Method_2.RR, 2);
 
-% Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR) 
+% Correcting QT based on Sagie's Liear regression method: QTlc = QT + 0.154(1-RR)
+Method_2.QTc1_median= Method_2.QT_median + 0.154*(1-Method_2.RR_median);
+Method_2.QTc1_mean = Method_2.QT_mean + 0.154*(1-Method_2.RR_mean);
+Method_2.QTc1_median_IQR = Method_2.QT_median_IQR + 0.154*(1-Method_2.RR_median);
+
 Method_2.QTc1_mean_jQRS = Method_2.QT_mean_jQRS + 0.154*(1-Method_2.RR_jQRS);
 Method_2.GaussQTlc_jQRS = Method_2.GaussQT_jQRS + 0.154*(1-Method_2.RR_jQRS);
-
 Method_2.QTc1_median_wavelet = Method_2.QT_median_wavelet + 0.154*(1-Method_2.RR_median_wavelet);
 Method_2.QTc1_median_wavelet_SQI = Method_2.QT_median_wavelet_SQI + 0.154*(1-Method_2.RR_median_wavelet);
 Method_2.GaussQTlc_SQI = Method_2.GaussQT_SQI + + 0.154*(1-Method_2.RR_median_wavelet);
-Method_2.QTc1_median_IQR = Method_2.QT_median_IQR + 0.154*(1-Method_2.RR_median_wavelet);
 
 md_QT_Qiao = Method_2.QTc1_median_wavelet'; %for the plot
 %% 2- Model Based method: Mr. Method_1
@@ -149,12 +152,11 @@ qtInt = [];
 GaussParams =[];
 soi = [];
 waveParams = [];
+qc_QT_indices={};
 
 for ch=1:nChannels
     [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs );
-%     Quality Control check to exclude QT <0.3 and >0.5 second
-    qc_indecies = 0.3<qtInt & qtInt<0.5;
-    qtInt = qtInt(qc_indecies);
+
     Method_1.Rpeak(ch,:) = {rPeaks};
     Method_1.Qon(ch,:) = {round(rPeaks-abs(waveParams.q(1,:))*fs)};% waveParams.q have large negative values for record se;16272
     Method_1.Toff(ch,:) = {round(rPeaks+(waveParams.t(2,:)*fs))};
@@ -178,31 +180,22 @@ for ch=1:nChannels
     Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
     Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
     
-    [~, Len_Rpeak] = size(Method_1.Rpeak{ch});
-    for idx=1 : Len_Rpeak
-        if  idx >2 && (idx+1)<=Len_Rpeak &&...
-                (Method_1.Qon{ch, 1}(idx) >  Method_1.Qon{ch, 1}(idx+1) ||...
-                Method_1.Qon{ch, 1}(idx) <  Method_1.Qon{ch, 1}(idx-1))
-            Method_1.Qon{ch, 1}(idx)=NaN;
-            Method_1.Rpeak{ch, 1}(idx)=NaN;
-            Method_1.Toff{ch, 1}(idx)=NaN;
-        end
-    end
-    Method_1.Rpeak{ch,1} = Method_1.Rpeak{ch,1}(~isnan(cell2mat(Method_1.Rpeak(ch,1))));
-    Method_1.Qon{ch,1} = Method_1.Qon{ch,1}(~isnan(cell2mat(Method_1.Qon(ch,1))));
-    Method_1.Toff{ch,1} = Method_1.Toff{ch,1}(~isnan(cell2mat(Method_1.Toff(ch,1))));
-    % Method_1.Qon(Method_1.Qon<0)=0;
-%         Method_1.Qon = Method_1.Qon(Method_1.Qon>0);
+   %     Quality Control check to exclude QT <0.3 and >0.5 second
+%     qc_indecies = 0.3<qtInt & qtInt<0.5;
+%     qtInt = qtInt(qc_indecies);
+% 
+%     Method_1.QT_median(ch,1)= nanmedian(qtInt);
+%     Method_1.QT_mean(ch,1) = nanmean(qtInt);
+    Method_1.QT(ch,:) = {(cell2mat(Method_1.Toff(ch,:))-cell2mat(Method_1.Qon(ch,:)))/fs};
+    qc_QT_indices(ch,:) = {0.3<Method_1.QT{ch,:} & Method_1.QT{ch,:}<0.5};
+    Method_1.QT(ch,:) = {Method_1.QT{ch,:}(qc_QT_indices{ch,1})};
+    Method_1.QT_median(ch,:) = median(cell2mat(Method_1.QT(ch,:)), 2);
+    Method_1.QT_mean(ch,:) = mean(cell2mat(Method_1.QT(ch,:)), 2);
 
-   
-
-    Method_1.QT_median(ch,1)= nanmedian(qtInt);
-    Method_1.QT_mean(ch,1) = nanmean(qtInt);
     Method_1.RR(ch,:) = {diff(rPeaks)/fs};
     Method_1.RR_mean(ch,1) = mean(diff(rPeaks)/fs);
     Method_1.RR_median(ch,1) = nanmedian(diff(rPeaks)/fs) ;
 end
-
 
 % Calculate median of interquartile range of 25-75%
 Method_1_IQR = iqr(Method_1.QT_median,1);
@@ -219,7 +212,6 @@ Method_1.QTc1_mean = Method_1.QT_mean + 0.154*(1-Method_2.RR_mean_wavelet);
 Method_1.QTc1_median = Method_1.QT_median + 0.154*(1-Method_2.RR_median_wavelet);
 Method_1.QTc1_median_IQR = Method_1.QT_median_IQR + 0.154*(1-Method_2.RR_median_wavelet);
 
-
 md_QT_Method_1 = Method_1.QTc1_median;
 
 % TODO: Calculate Mr. Method_1 QT_median_SQI
@@ -233,6 +225,8 @@ Method_1.QTc1_median_IQR(Method_1.QTc1_median_IQR>0.5 | Method_1.QTc1_median_IQR
 
 md_QT_Method_1(md_QT_Method_1>0.5 | md_QT_Method_1<0.3) = NaN;
 
+Method_2.QTc1_median(Method_2.QTc1_median>0.5 | Method_2.QTc1_median<0.3)=NaN;
+Method_2.QTc1_mean(Method_2.QTc1_mean>0.5 | Method_2.QTc1_mean<0.3)=NaN;
 Method_2.QTc1_median_wavelet(Method_2.QTc1_median_wavelet>0.5 | Method_2.QTc1_median_wavelet<0.3)=NaN;
 Method_2.QTc1_median_wavelet_SQI(Method_2.QTc1_median_wavelet_SQI >0.5 | Method_2.QTc1_median_wavelet_SQI<0.3)=NaN;
 Method_2.QTc1_median_IQR(Method_2.QTc1_median_IQR >0.5 | Method_2.QTc1_median_IQR<0.3)=NaN;
@@ -274,17 +268,16 @@ figExt = ['.fig';'.eps'; '.png'];
 %% save results as a csv
 
 % colName = 'channelNum';
-Method_2_colNames = {'channelNum', 'QTc1_median_wavelet', 'QTc1_median_wavelet_SQI',...
-    'GaussQTlc_SQI', 'QTc1_median_IQR', 'QTc1_mean_jQRS','GaussQTlc_jQRS',...
-    'RR_jQRS', 'RR_median_wavelet', 'RR_mean_wavelet'};
+Method_2_colNames = {'channelNum', 'Method_2_QTc1_median', 'Method_2_QTc1_mean',...
+    'Method_2_QTc1_median_IQR', 'Method_2_RR_median', 'Method_2_RR_mean'};
 channelNum = [1:nChannels]';
-Method_2_table = table(channelNum, Method_2.QTc1_median_wavelet, Method_2.QTc1_median_wavelet_SQI,...
-    Method_2.GaussQTlc_SQI, Method_2.QTc1_median_IQR, Method_2.QTc1_mean_jQRS,... 
-    Method_2.GaussQTlc_jQRS, Method_2.RR_jQRS, Method_2.RR_median_wavelet,...
-    Method_2.RR_mean_wavelet, 'VariableNames',Method_2_colNames);
+Method_2_table = table(channelNum, Method_2.QT_median ,Method_2.QTc1_mean,...
+    Method_2.QTc1_median_IQR, Method_2.RR_median, Method_2.RR_mean...
+    , 'VariableNames',Method_2_colNames);
 
-Method_1_colNames = {'channelNum', 'QTc1_median', 'QTc1_mean', 'QTc1_median_IQR',...
-    'RR_median', 'RR_mean'};
+Method_1_colNames = {'channelNum', 'Method_1_QTc1_median', ...
+    'Method_1_QTc1_mean', 'Method_1_QTc1_median_IQR', 'Method_1_RR_median',...
+    'Method_1_RR_mean'};
 
 Method_1_table = table(channelNum, Method_1.QTc1_median, Method_1.QTc1_mean,...
     Method_1.QTc1_median_IQR, Method_1.RR_median, Method_1.RR_mean,...
@@ -308,11 +301,12 @@ if Troubleshooting
 %     title("R peak detection step in lead 1")
 %     legend({'preprocessed', 'Method 1 R peaks', 'Method 2 R peaks', 'manual R peaks'});
 %     hold off
-
+    qc_QT_indices_ch1 = cell2mat(qc_QT_indices(1,1));
+    Method_1.Qon_ch1 = Method_1.Qon{1,:}(qc_QT_indices_ch1);
     figure(4)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
-    plot(cell2mat(Method_1.Qon(1,1)), data_base_cor_csv(cell2mat(Method_1.Qon(1,1)),1), 'mo', 'LineWidth', 3);
+    plot(Method_1.Qon_ch1 , data_base_cor_csv(Method_1.Qon_ch1 ,1), 'mo', 'LineWidth', 3);
     plot(cell2mat(Method_1.Rpeak(1,1)), data_base_cor_csv(cell2mat(Method_1.Rpeak(1,1))), 'b+', 'LineWidth', 3);
     plot(Method_2.Qon(1,:), data_base_cor_csv(Method_2.Qon(1,:),1), 'go', 'LineWidth', 3);
     plot(humanQT.Qstart, data_base_cor_csv(humanQT.Qstart,1), 'ro','LineWidth', 3);
