@@ -67,12 +67,12 @@ folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 [numPatients, ~] = size(folderNames);
 
 
-for fn=2:numPatients
+for fn=1:numPatients
     fprintf('Currently Processing subject: %s \n', folderNames(fn,:).name);
     recordNames = dir(fullfile(dbPath, folderNames(fn,:).name,'*.dat'));
 
     [numRecords, ~] = size(recordNames);
-    for rn=1:numRecords
+    for rn=30:numRecords
         fprintf('Currently Processing record #: %s \n', recordNames(rn,:).name);
         [~, baseFileName, extension] = fileparts(recordNames(rn, :).name);
         pathSplit = split(dbPath, '\');

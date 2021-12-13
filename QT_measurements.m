@@ -78,16 +78,37 @@ for ch=1:nChannels
     calc_delay = abs(D*fs/fs2)-1; % manual observation showed a sample difference of 28 instead of 29.
 %     Todo: similar to method 1, for each beat that is missing Qon or Toff,
 %     sikip the beat
+    Method_2.Rpeak(ch,1) = {beats.R};
+    Method_2.Qon(ch,1)= {beats.QRSon};
+    Method_2.Toff(ch,1)= {beats.Toff};
+%     Method_2.Rpeak(ch,:) = {beats.R(~isnan(beats.R))};
+    [~, Len_Rpeak] = size(Method_2.Rpeak{ch,1});
+    for idx=1 : Len_Rpeak
+        if isnan(Method_2.Qon{ch, 1}(idx)) || isnan(Method_2.Toff{ch, 1}(idx)) ||...
+                Method_2.Qon{ch, 1}(idx)<0 || Method_2.Toff{ch, 1}(idx)<0
+            Method_2.Rpeak{ch, 1}(idx)=NaN ;
+            Method_2.Qon{ch, 1}(idx)=NaN;
+            Method_2.Toff{ch, 1}(idx)=NaN;
+        end
+        if  idx >2 && (idx+1)<=Len_Rpeak &&...
+                (Method_2.Qon{ch, 1}(idx) >  Method_2.Qon{ch, 1}(idx+1) ||...
+                Method_2.Qon{ch, 1}(idx) <  Method_2.Qon{ch, 1}(idx-1))
+            Method_2.Qon{ch, 1}(idx)=NaN;
+            Method_2.Rpeak{ch, 1}(idx)=NaN;
+            Method_2.Toff{ch, 1}(idx)=NaN;
+        end
 
-    Method_2.Rpeak(ch,:) = {beats.R(~isnan(beats.R))};
+    end
+    Method_2.Rpeak{ch,1} = Method_2.Rpeak{ch,1}(~isnan(cell2mat(Method_2.Rpeak(ch,1))));
+    Method_2.Qon{ch,1} = Method_2.Qon{ch,1}(~isnan(cell2mat(Method_2.Qon(ch,1))));
+    Method_2.Toff{ch,1} = Method_2.Toff{ch,1}(~isnan(cell2mat(Method_2.Toff(ch,1))));
+
     Method_2.Rpeak(ch,:) = {round(Method_2.Rpeak{ch,:}*fs/fs2-calc_delay)};
     Method_2.RR(ch,:) = {diff(cell2mat(Method_2.Rpeak(ch,:)))/fs};
     Method_2.RR_median(ch,:) = median(cell2mat(Method_2.RR(ch, 1)), 2);
     Method_2.RR_mean(ch,:) = mean(cell2mat(Method_2.RR(ch, 1)), 2);
     
-    Method_2.Qon(ch,:)= {beats.QRSon(~isnan(beats.QRSon))};
     Method_2.Qon(ch,:) = {round(Method_2.Qon{ch,:}*fs/fs2-calc_delay)};
-    Method_2.Toff(ch,:)= {beats.Toff(~isnan(beats.Toff))};
     Method_2.Toff(ch,:) = {round(Method_2.Toff{ch,:}*fs/fs2-calc_delay)};
     
     Method_2.QT(ch,:) = {(cell2mat(Method_2.Toff(ch,:))-cell2mat(Method_2.Qon(ch,:)))/fs};
@@ -160,6 +181,8 @@ waveParams = [];
 qc_QT_indices={};
 
 for ch=1:nChannels
+%     ToDo: resample to fs of 1000 to have it similar to wavelet method,
+%     and it might give more acurate estimates.
     [GaussParams, rPeaks, soi, waveParams, qtInt]=qtParamsGausFit(data_base_cor_csv(:, ch), fs );
 
     Method_1.Rpeak(ch,:) = {rPeaks};
@@ -352,10 +375,10 @@ if Troubleshooting
 
 end
 close all;
-for fx=1:3
-    fileName = [fName , '_lead1', figExt(fx,:)];
-    figName = fullfile(figPath, fileName);
-    saveas(gcf, figName);
-end
+% for fx=1:3
+%     fileName = [fName , '_lead1', figExt(fx,:)];
+%     figName = fullfile(figPath, fileName);
+%     saveas(gcf, figName);
+% end
 
 end

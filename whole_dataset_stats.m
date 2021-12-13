@@ -38,18 +38,17 @@ folderNames = folderNames(~ismember({folderNames(:).name},{'.','..'}));
 [numPatients, ~] = size(folderNames);
 
 
-colToRead = {'RR_mean','RR_median', 'QTc1_median', 'QTc1_mean',...
-    'QTc1_median_IQR_Method_1_table', 'RR_median_wavelet', 'RR_mean_wavelet', 'RR_jQRS',...
-    'QTc1_median_wavelet', 'QTc1_median_wavelet_SQI', 'QTc1_mean_jQRS',...
-    'GaussQTlc_jQRS', 'GaussQTlc_SQI', 'QTc1_median_IQR_Method_2_table'};
+colToRead = {'Method1_QTc1_median', 'Method1_QTc1_mean', 'Method1_QTc1_median_IQR',...
+    'Method1_RR_median', 'Method1_RR_mean', 'Method2_QTc1_median', ...
+    'Method2_QTc1_mean', 'Method2_QTc1_median_IQR', 'Method2_RR_median',...
+    'Method2_RR_mean',};
 
 % TODO: use datastructure to collect QTs
 QT.subject={}; QT.record={}; QT.channelNum=[] ; QT.RR_mean_method1=[];QT.RR_median_method1=[];
 QT.QTc1_median_method1=[]; QT.QTc1_mean_method1=[];
 QT.QTc1_median_IQR_Method_1=[]; 
-QT.RR_median_method2=[]; QT.RR_jQRS_method2=[]; QT.RR_mean_method2=[];
-QT.QTc1_median_method2=[]; QT.QTc1_median_method2_SQI=[]; QT.QTc1_mean_method2_jQRS=[];
-QT.QTc1_jQRS_method2_Gauss=[]; QT.QTc1_jQRS_method2_Gauss_SQI=[];
+QT.RR_median_method2=[]; QT.RR_mean_method2=[];
+QT.QTc1_median_method2=[]; QT.QTc1_mean_method2=[];
 QT.QTc1_median_IQR_Method_2=[]; QT.RR_median_human=[]; QT.RR_mean_human=[];
 QT.QTc1_median_human=[]; QT.QTc1_mean_human=[]; QT.RMSE_method_1=[]; 
 QT.RMSE_method_2=[]; 
@@ -86,22 +85,18 @@ for fn=1:numPatients
             split_bfn = split(baseFileName,'_');
             QT.record(end+1,1) = split_bfn(1,:);
             QT.channelNum(end+1,1) = ch;
-            QT.RR_mean_method1(end+1,1) = table2array(QT_read(ch,1));
-            QT.RR_median_method1(end+1,1) = table2array(QT_read(ch,2));
-            QT.QTc1_median_method1(end+1,1) = table2array(QT_read(ch,3));
-            QT.QTc1_mean_method1(end+1,1) = table2array(QT_read(ch,4));
-            QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(ch,5));
-            QT.RR_median_method2(end+1,1) = table2array(QT_read(ch,6));
-            QT.RR_mean_method2(end+1,1) = table2array(QT_read(ch,7));
-            QT.RR_jQRS_method2(end+1,1)= table2array(QT_read(ch,8));
 
-            QT.QTc1_median_method2(end+1,1) = table2array(QT_read(ch,9));
-            QT.QTc1_median_method2_SQI(end+1,1) = table2array(QT_read(ch,10));
-            QT.QTc1_mean_method2_jQRS(end+1,1) = table2array (QT_read(ch, 11));
-            QT.QTc1_jQRS_method2_Gauss(end+1,1) = table2array(QT_read(ch, 12));
-            QT.QTc1_jQRS_method2_Gauss_SQI(end+1,1) = table2array(QT_read(ch,13));
-            QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(ch,14));
-            
+            QT.QTc1_median_method1(end+1,1) = table2array(QT_read(ch,1));
+            QT.QTc1_mean_method1(end+1,1) = table2array(QT_read(ch,2));
+            QT.QTc1_median_IQR_Method_1(end+1,1) = table2array(QT_read(ch,3));
+            QT.RR_median_method1(end+1,1) = table2array(QT_read(ch,4));
+            QT.RR_mean_method1(end+1,1) = table2array(QT_read(ch,5));
+            QT.QTc1_median_method2(end+1,1) = table2array(QT_read(ch,6));
+            QT.QTc1_mean_method2(end+1,1) = table2array(QT_read(ch, 7));
+            QT.QTc1_median_IQR_Method_2(end+1,1) = table2array(QT_read(ch,8));
+            QT.RR_median_method2(end+1,1) = table2array(QT_read(ch,9));
+            QT.RR_mean_method2(end+1,1) = table2array(QT_read(ch,10));
+
             QT.RR_median_human(end+1,1) = table2array(QT_read_human(ch,1));
             QT.RR_mean_human(end+1,1) = table2array(QT_read_human(ch, 2));
             QT.QTc1_median_human(end+1,1) = table2array(QT_read_human(ch, 3));
@@ -213,20 +208,17 @@ title('QT database Median QTlc for Lead 2')
 %% Save results for the whole dataset in a CSV
 
 
-QT_table_colNames = {'subject','record', 'channelNum', 'RR_mean_method_1',...
-    'RR_median_method_1', 'QTc1_median_method_1', 'QTc1_mean_method_1',...
-    'QTc1_median_IQR_method_1', 'RR_median_method_2', 'RR_mean_method_2','RR_jQRS_method_2',...
-    'QTc1_median_method_2', 'QTc1_median_SQI_method_2', 'QTc1_mean_jQRS_method_2',...
-    'QTc1_jQRS_method_2_Gauss', 'QTc1_jQRS_method_2_Gauss_SQI', ...
-    'QTc1_median_IQR_Method_2', 'RR_median_human', 'RR_mean_human',...
-    'QTc1_median_human', 'QTc1_mean_human'};
+QT_table_colNames = {'subject','record', 'channelNum', 'Method1_RR_mean',...
+    'Method1_RR_median', 'Method1_QTc1_median', 'Method1_QTc1_mean',...
+    'Method1_QTc1_median_IQR', 'Method2_RR_median', 'Method2_RR_mean',...
+    'Method2_QTc1_median', 'Method2_QTc1_mean', 'Method2_QTc1_median_IQR',...
+    'RR_median_human', 'RR_mean_human', 'QTc1_median_human', 'QTc1_mean_human'};
 QT_table = table(QT.subject, QT.record, QT.channelNum, QT.RR_mean_method1,...
     QT.RR_median_method1, QT.QTc1_median_method1, QT.QTc1_mean_method1,...
-    QT.QTc1_median_IQR_Method_1, QT.RR_median_method2, QT.RR_mean_method2, QT.RR_jQRS_method2,...
-    QT.QTc1_median_method2, QT.QTc1_median_method2_SQI, QT.QTc1_mean_method2_jQRS,...
-    QT.QTc1_jQRS_method2_Gauss, QT.QTc1_jQRS_method2_Gauss_SQI,...
-    QT.QTc1_median_IQR_Method_2, QT.RR_median_human, QT.RR_mean_human,...
-    QT.QTc1_median_human, QT.QTc1_mean_human, 'VariableNames',QT_table_colNames);
+    QT.QTc1_median_IQR_Method_1, QT.RR_median_method2, QT.RR_mean_method2, ...
+    QT.QTc1_median_method2, QT.QTc1_mean_method2, QT.QTc1_median_IQR_Method_2,...
+    QT.RR_median_human, QT.RR_mean_human, QT.QTc1_median_human,...
+    QT.QTc1_mean_human, 'VariableNames',QT_table_colNames);
 
 
 csv_fileName = 'QT_wholedataset_results.csv';
