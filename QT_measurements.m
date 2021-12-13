@@ -27,7 +27,7 @@ function [Method_2, Method_1] = QT_measurements(processedPath, fName, figPath, n
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialize variables
 
-Troubleshooting = 0; % Troubleshooting flag to plot every step
+Troubleshooting = 1; % Troubleshooting flag to plot every step
 
 data_base_cor_csv = csvread(processedPath);%Read preprocessed csv
 
@@ -353,28 +353,28 @@ if Troubleshooting
     plot(1:L, data_base_cor_csv(:,1), 'k-');
     plot(Method_1.Qon_ch1 , data_base_cor_csv(Method_1.Qon_ch1 ,1), 'mo', 'LineWidth', 3);
     plot(cell2mat(Method_1.Rpeak(1,1)), data_base_cor_csv(cell2mat(Method_1.Rpeak(1,1))), 'b+', 'LineWidth', 3);
-    plot(Method_2.Qon(1,:), data_base_cor_csv(Method_2.Qon(1,:),1), 'go', 'LineWidth', 3);
+    plot(cell2mat(Method_2.Qon(1,1)), data_base_cor_csv(cell2mat(Method_2.Qon(1,1)),1), 'go', 'LineWidth', 3);
     plot(humanQT.Qstart, data_base_cor_csv(humanQT.Qstart,1), 'ro','LineWidth', 3);
-    legend('Preprocessed','Method 1 Qon', 'R peaks', 'Method 2 Qon', 'manual Qon')
+    legend('Preprocessed ECG','Gaussian Qon', 'Gaussian R peaks', 'Wavelet Qon', 'manual Qon')
     title("Qon detection step in lead 1")
-    xlabel('samples');
-    ylabel('mV');
+    xlabel('time');
+    ylabel('[mV]');
     hold off
 
     figure(5)
     hold on
     plot(1:L, data_base_cor_csv(:,1), 'k-');
     plot(cell2mat(Method_1.Toff(1,1)), data_base_cor_csv(cell2mat(Method_1.Toff(1,1)),1), 'm*', 'LineWidth', 3);
-    plot(Method_2.Toff(1,:), data_base_cor_csv(Method_2.Toff(1,:),1), 'g*', 'LineWidth', 3);
+    plot(cell2mat(Method_2.Toff(1,1)), data_base_cor_csv(cell2mat(Method_2.Toff(1,1)),1), 'g*', 'LineWidth', 3);
     plot(humanQT.Tend, data_base_cor_csv(humanQT.Tend,1), 'r*','LineWidth', 3);
-    legend('Preprocessed','Method 1 Toff', 'Method 2 Toff', 'manual Toff')
+    legend('Preprocessed ECG','Gaussian Toff', 'Wavelet Toff', 'manual Toff')
     title("Toff detection step in lead 1")
-    xlabel('samples');
-    ylabel('mV');
+    xlabel('time');
+    ylabel('[mV]');
     hold off
 
 end
-close all;
+% close all;
 % for fx=1:3
 %     fileName = [fName , '_lead1', figExt(fx,:)];
 %     figName = fullfile(figPath, fileName);
